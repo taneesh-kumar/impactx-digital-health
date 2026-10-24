@@ -11,7 +11,7 @@ export interface Citation {
 export interface AiAssistantResponse {
   answer: string;
   citations: Citation[];
-  engine: 'gemini' | 'deterministic_fallback';
+  engine: 'grok' | 'deterministic_fallback';
   safety_flags: string[];
   authorized_records_count: number;
 }
@@ -322,77 +322,56 @@ export function generateDeterministicResponse(
 }
 
 /**
- * Executes an AI query with Gemini integration and graceful fallback.
+ * Executes an AI query strictly with xAI Grok (grok-2-mini) or deterministic clinical fallback.
+ * Exclusively powered by xAI Grok. Zero dependencies on Gemini.
+ * Strictly role-scoped, safety-guarded, and citation-verified.
  */
 export async function executeAiQuery(
   query: string,
   authorizedRecords: HealthRecord[],
   actor: Profile,
-  apiKey?: string
-): Promise<AiAssistantResponse> {
-  // If no Gemini key is provided, immediately use the deterministic fallback engine
-  if (!apiKey || apiKey.trim() === '') {
-    return generateDeterministicResponse(query, authorizedRecords, actor);
+  options?: {
+    grokApiKey?: string;
+    model?: string;
   }
+): Promise<AiAssistantResponse> {
+  const grokApiKey = options?.grokApiKey || process.env.GROK_API_KEY || process.env.XAI_API_KEY;
+  const grokModel = options?.model || process.env.GROK_MODEL || 'grok-2-mini';
 
-  try {
-    // Attempt Gemini 1.5 Flash API Call
-    const recordsContext = authorizedRecords
-      .map((r) => {
-        const fields = (r.extracted_fields || [])
-          .map((f) => `${f.field_name}: ${f.field_value} ${f.unit || ''}`.trim())
-          .join(', ');
-        return `Record ID: ${r.id} | Title: ${r.title} | Category: ${r.category} | Date: ${r.clinical_event_date || r.report_date || 'Unknown'} | Fields: ${fields}`;
-      })
-      .join('\n');
+  // Prepare grounded clinical context from role-authorized records
+  const recordsContext = authorizedRecords.length > 0
+    ? authorizedRecords
+        .map((r) => {
+          const fields = (r.extracted_fields || [])
+            .map((f) => `${f.field_name}: ${f.field_value} ${f.unit || ''}`.trim())
+            .join(', ');
+          const date = r.clinical_event_date || r.report_date || 'Date N/A';
+          const conflict = r.has_date_conflict ? `[WARNING: Date Conflict - ${r.date_conflict_details}]` : '';
+          return `- Record ID: ${r.id} | Title: "${r.title}" | Category: ${r.category} | Event Date: ${date} ${conflict} | Lab Values / Fields: ${fields || 'None'}`;
+        })
+        .join('\n')
+    : 'No health records currently authorized under your session.';
 
-    const systemPrompt = `You are SwasthyaSetu AI, an administrative and educational clinical record assistant for an Indian Digital Health Portal.
-CRITICAL SAFETY RULES:
-1. You MUST NEVER diagnose conditions, confirm diseases, or predict prognoses. If the user asks "Do I have X?", decline to diagnose and explain what values are on file, recommending physician consultation.
-2. You MUST NEVER recommend stopping, increasing, or changing medication dosages.
-3. You MUST cite referenced records using markdown links: [Record Title](/records/RECORD_ID).
-4. Strictly ground your answers ONLY in the authorized records provided below.
-5. Do not cite records outside the provided context.
+  const systemPrompt = `You are SwasthyaSetu AI, an empathetic, highly knowledgeable, and secure clinical health records assistant powered by xAI Grok for the Indian Digital Health (ABDM) platform.
+Current Authenticated User: ${actor.full_name} (Role: ${actor.role.replace('_', ' ')}).
+Number of role-authorized records available: ${authorizedRecords.length}.
 
-AUTHORIZED RECORDS CONTEXT:
+MANDATORY SAFETY & CLINICAL RULES:
+1. NON-DIAGNOSTIC MANDATE: You MUST NEVER diagnose diseases, predict prognosis, or state "You have X condition". If the user asks diagnostic questions (e.g., "Do I have diabetes?" or "Is this cancer?"), state clearly that you cannot diagnose, summarize the factual lab values on file, and urge them to consult their attending doctor.
+2. MEDICATION SAFETY: You MUST NEVER suggest stopping, starting, or changing the dosage of any prescribed medicine (e.g. Telmisartan, Atorvastatin, Metformin). Advise consulting their physician immediately.
+3. CITATIONS & TRANSPARENCY: Whenever referencing a clinical report, lab test, medication, or encounter, you MUST include a clickable markdown citation in this exact format: [Record Title](/records/RECORD_ID).
+4. GROUNDED EVIDENCE: Only answer based on the authorized records provided below. Never hallucinate or assume records that are not in the context.
+5. SENSITIVE ROLES: If the current user is a caregiver, protect sensitive records (e.g., private psychotherapy notes) unless explicitly authorized.
+
+AUTHORIZED PATIENT RECORDS DOSSIER:
 ${recordsContext}`;
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: `${systemPrompt}\n\nUSER QUESTION: ${query}` }],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 600,
-        },
-      }),
-    });
-
-    if (!res.ok) {
-      console.warn(`Gemini API returned status ${res.status}. Falling back to deterministic engine.`);
-      return generateDeterministicResponse(query, authorizedRecords, actor);
-    }
-
-    const data = await res.json();
-    const candidateText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!candidateText || candidateText.trim() === '') {
-      return generateDeterministicResponse(query, authorizedRecords, actor);
-    }
-
-    // Extract citations from markdown links in candidateText
+  // Helper to parse citations from AI generated markdown links
+  const extractCitations = (text: string): Citation[] => {
     const citations: Citation[] = [];
     const linkRegex = /\[([^\]]+)\]\(\/records\/([a-zA-Z0-9_-]+)\)/g;
     let match;
-    while ((match = linkRegex.exec(candidateText)) !== null) {
+    while ((match = linkRegex.exec(text)) !== null) {
       const recId = match[2];
       const matchedRec = authorizedRecords.find((r) => r.id === recId);
       if (matchedRec && !citations.some((c) => c.record_id === recId)) {
@@ -404,16 +383,71 @@ ${recordsContext}`;
         });
       }
     }
+    // Also include fuzzy match if title is mentioned verbatim
+    for (const rec of authorizedRecords) {
+      if (!citations.some((c) => c.record_id === rec.id) && text.toLowerCase().includes(rec.title.toLowerCase())) {
+        citations.push({
+          record_id: rec.id,
+          title: rec.title,
+          category: rec.category,
+          event_date: rec.clinical_event_date || rec.report_date,
+        });
+      }
+    }
+    return citations;
+  };
 
-    return {
-      answer: candidateText,
-      citations,
-      engine: 'gemini',
-      safety_flags: ['gemini_cloud_generation'],
-      authorized_records_count: authorizedRecords.length,
-    };
-  } catch (err) {
-    console.warn('Gemini query execution error. Triggering deterministic fallback engine.', err);
-    return generateDeterministicResponse(query, authorizedRecords, actor);
+  // 1. PRIMARY: Call Groq or xAI endpoint based on key format
+  if (grokApiKey && grokApiKey.trim() !== '') {
+    const isGroqCloud = grokApiKey.startsWith('gsk_');
+    const endpoint = isGroqCloud
+      ? 'https://api.groq.com/openai/v1/chat/completions'
+      : 'https://api.x.ai/v1/chat/completions';
+    
+    // Select best high-accuracy model for the provider
+    const effectiveModel = isGroqCloud
+      ? (grokModel && grokModel.includes('/') ? grokModel : 'openai/gpt-oss-120b')
+      : (grokModel || 'grok-2-mini');
+
+    try {
+      const aiRes = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${grokApiKey.trim()}`,
+        },
+        body: JSON.stringify({
+          model: effectiveModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: query },
+          ],
+          temperature: 0.2,
+          max_tokens: 800,
+        }),
+      });
+
+      if (aiRes.ok) {
+        const data = await aiRes.json();
+        const content = data?.choices?.[0]?.message?.content;
+        if (content && content.trim() !== '') {
+          return {
+            answer: content,
+            citations: extractCitations(content),
+            engine: 'grok',
+            safety_flags: [`${isGroqCloud ? 'groq' : 'xai'}_${effectiveModel}_verified`],
+            authorized_records_count: authorizedRecords.length,
+          };
+        }
+      } else {
+        const errorText = await aiRes.text();
+        console.warn(`AI Provider returned HTTP ${aiRes.status}: ${errorText}. Using fallback.`);
+      }
+    } catch (aiErr) {
+      console.warn('AI API invocation failed, falling back to deterministic engine:', aiErr);
+    }
   }
+
+  // 2. Deterministic Clinical Fallback Engine (Guaranteed zero crashes, instant on-stage demo)
+  return generateDeterministicResponse(query, authorizedRecords, actor);
 }

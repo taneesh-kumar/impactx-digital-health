@@ -116,7 +116,7 @@ export const SEED_PROVIDERS: Provider[] = [
 
 export const SEED_SOURCES: RecordSource[] = [
   {
-    id: 's1111111-1111-1111-1111-111111111111',
+    id: 'e1111111-1111-1111-1111-111111111111',
     source_type: 'ehr_integration',
     name: 'AIIMS Central Clinical Registry',
     identifier: 'AIIMS-HL7-GATEWAY',
@@ -124,7 +124,7 @@ export const SEED_SOURCES: RecordSource[] = [
     created_at: '2026-01-01T00:00:00Z',
   },
   {
-    id: 's2222222-2222-2222-2222-222222222222',
+    id: 'e2222222-2222-2222-2222-222222222222',
     source_type: 'lab_feed',
     name: 'Dr. Lal PathLabs Diagnostic Feed',
     identifier: 'LALPATH-DELHI-SOUTH',
@@ -132,7 +132,7 @@ export const SEED_SOURCES: RecordSource[] = [
     created_at: '2026-01-01T00:00:00Z',
   },
   {
-    id: 's3333333-3333-3333-3333-333333333333',
+    id: 'e3333333-3333-3333-3333-333333333333',
     source_type: 'clinical_portal',
     name: 'Max Super Speciality Portal',
     identifier: 'MAX-SAKET-EHR',
@@ -140,7 +140,7 @@ export const SEED_SOURCES: RecordSource[] = [
     created_at: '2026-01-01T00:00:00Z',
   },
   {
-    id: 's4444444-4444-4444-4444-444444444444',
+    id: 'e4444444-4444-4444-4444-444444444444',
     source_type: 'manual_upload',
     name: 'Patient Mobile App Upload',
     identifier: 'MOBILE-CAM-UPLOAD',
@@ -151,10 +151,10 @@ export const SEED_SOURCES: RecordSource[] = [
 
 export const SEED_RECORDS: HealthRecord[] = [
   {
-    id: 'r0111111-1111-1111-1111-111111111111',
+    id: 'd0111111-1111-1111-1111-111111111111',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's2222222-2222-2222-2222-222222222222',
+    source_id: 'e2222222-2222-2222-2222-222222222222',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'lab_result',
     title: 'Comprehensive Fasting Lipid Profile',
@@ -179,7 +179,7 @@ export const SEED_RECORDS: HealthRecord[] = [
     extracted_fields: [
       {
         id: 'f1',
-        record_id: 'r0111111-1111-1111-1111-111111111111',
+        record_id: 'd0111111-1111-1111-1111-111111111111',
         field_name: 'Total Cholesterol',
         field_value: '194',
         field_type: 'numeric',
@@ -192,7 +192,7 @@ export const SEED_RECORDS: HealthRecord[] = [
       },
       {
         id: 'f2',
-        record_id: 'r0111111-1111-1111-1111-111111111111',
+        record_id: 'd0111111-1111-1111-1111-111111111111',
         field_name: 'Serum Triglycerides',
         field_value: '168',
         field_type: 'numeric',
@@ -205,7 +205,7 @@ export const SEED_RECORDS: HealthRecord[] = [
       },
       {
         id: 'f3',
-        record_id: 'r0111111-1111-1111-1111-111111111111',
+        record_id: 'd0111111-1111-1111-1111-111111111111',
         field_name: 'HDL Cholesterol (Direct)',
         field_value: '44',
         field_type: 'numeric',
@@ -218,7 +218,7 @@ export const SEED_RECORDS: HealthRecord[] = [
       },
       {
         id: 'f4',
-        record_id: 'r0111111-1111-1111-1111-111111111111',
+        record_id: 'd0111111-1111-1111-1111-111111111111',
         field_name: 'LDL Cholesterol (Calculated)',
         field_value: '116',
         field_type: 'numeric',
@@ -232,10 +232,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     ],
   },
   {
-    id: 'r0222222-2222-2222-2222-222222222222',
+    id: 'd0222222-2222-2222-2222-222222222222',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's4444444-4444-4444-4444-444444444444',
+    source_id: 'e4444444-4444-4444-4444-444444444444',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'lab_result',
     title: 'Hepatic Function & Bilirubin Panel (Date Discrepancy)',
@@ -260,7 +260,7 @@ export const SEED_RECORDS: HealthRecord[] = [
     extracted_fields: [
       {
         id: 'f5',
-        record_id: 'r0222222-2222-2222-2222-222222222222',
+        record_id: 'd0222222-2222-2222-2222-222222222222',
         field_name: 'Serum Bilirubin Total',
         field_value: '0.9',
         field_type: 'numeric',
@@ -273,7 +273,7 @@ export const SEED_RECORDS: HealthRecord[] = [
       },
       {
         id: 'f6',
-        record_id: 'r0222222-2222-2222-2222-222222222222',
+        record_id: 'd0222222-2222-2222-2222-222222222222',
         field_name: 'SGPT / ALT',
         field_value: '38',
         field_type: 'numeric',
@@ -287,10 +287,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     ],
   },
   {
-    id: 'r0333333-3333-3333-3333-333333333333',
+    id: 'd0333333-3333-3333-3333-333333333333',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's3333333-3333-3333-3333-333333333333',
+    source_id: 'e3333333-3333-3333-3333-333333333333',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'clinical_note',
     title: 'Cardiology Outpatient Follow-up Note',
@@ -314,10 +314,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     source: SEED_SOURCES[2],
   },
   {
-    id: 'r0444444-4444-4444-4444-444444444444',
+    id: 'd0444444-4444-4444-4444-444444444444',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
-    source_id: 's1111111-1111-1111-1111-111111111111',
+    source_id: 'e1111111-1111-1111-1111-111111111111',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'radiology',
     title: 'Chest X-Ray PA View (Digital Diagnostic)',
@@ -341,10 +341,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     source: SEED_SOURCES[0],
   },
   {
-    id: 'r0555555-5555-5555-5555-555555555555',
+    id: 'd0555555-5555-5555-5555-555555555555',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
-    source_id: 's4444444-4444-4444-4444-444444444444',
+    source_id: 'e4444444-4444-4444-4444-444444444444',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'radiology',
     title: 'Chest X-Ray PA View (Patient Mobile Copy)',
@@ -368,10 +368,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     source: SEED_SOURCES[3],
   },
   {
-    id: 'r0666666-6666-6666-6666-666666666666',
+    id: 'd0666666-6666-6666-6666-666666666666',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's2222222-2222-2222-2222-222222222222',
+    source_id: 'e2222222-2222-2222-2222-222222222222',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'lab_result',
     title: 'Glycated Hemoglobin (HbA1c) & Fasting Plasma Glucose',
@@ -396,7 +396,7 @@ export const SEED_RECORDS: HealthRecord[] = [
     extracted_fields: [
       {
         id: 'f7',
-        record_id: 'r0666666-6666-6666-6666-666666666666',
+        record_id: 'd0666666-6666-6666-6666-666666666666',
         field_name: 'Glycated Hemoglobin (HbA1c)',
         field_value: '6.4',
         field_type: 'numeric',
@@ -409,7 +409,7 @@ export const SEED_RECORDS: HealthRecord[] = [
       },
       {
         id: 'f8',
-        record_id: 'r0666666-6666-6666-6666-666666666666',
+        record_id: 'd0666666-6666-6666-6666-666666666666',
         field_name: 'Fasting Blood Glucose',
         field_value: '112',
         field_type: 'numeric',
@@ -423,10 +423,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     ],
   },
   {
-    id: 'r0777777-7777-7777-7777-777777777777',
+    id: 'd0777777-7777-7777-7777-777777777777',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's4444444-4444-4444-4444-444444444444',
+    source_id: 'e4444444-4444-4444-4444-444444444444',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'lab_result',
     title: 'Scanned Blood Sugar & HbA1c Slip (Xerox Scan)',
@@ -450,10 +450,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     source: SEED_SOURCES[3],
   },
   {
-    id: 'r0888888-8888-8888-8888-888888888888',
+    id: 'd0888888-8888-8888-8888-888888888888',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's4444444-4444-4444-4444-444444444444',
+    source_id: 'e4444444-4444-4444-4444-444444444444',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'prescription',
     title: 'Handwritten Cardiology Prescription & Dosage Sheet',
@@ -478,7 +478,7 @@ export const SEED_RECORDS: HealthRecord[] = [
     extracted_fields: [
       {
         id: 'f9',
-        record_id: 'r0888888-8888-8888-8888-888888888888',
+        record_id: 'd0888888-8888-8888-8888-888888888888',
         field_name: 'Prescribed Drug 1',
         field_value: 'Telmisartan [40mg vs 20mg uncertain]',
         field_type: 'string',
@@ -491,7 +491,7 @@ export const SEED_RECORDS: HealthRecord[] = [
       },
       {
         id: 'f10',
-        record_id: 'r0888888-8888-8888-8888-888888888888',
+        record_id: 'd0888888-8888-8888-8888-888888888888',
         field_name: 'Prescribed Drug 2',
         field_value: 'Metformin 500mg SR OD',
         field_type: 'string',
@@ -505,10 +505,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     ],
   },
   {
-    id: 'r0999999-9999-9999-9999-999999999999',
+    id: 'd0999999-9999-9999-9999-999999999999',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's1111111-1111-1111-1111-111111111111',
+    source_id: 'e1111111-1111-1111-1111-111111111111',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'clinical_note',
     title: 'Standard 12-Lead Resting Electrocardiogram (ECG)',
@@ -532,10 +532,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     source: SEED_SOURCES[0],
   },
   {
-    id: 'r1010101-1010-1010-1010-101010101010',
+    id: 'd1010101-1010-1010-1010-101010101010',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
-    source_id: 's3333333-3333-3333-3333-333333333333',
+    source_id: 'e3333333-3333-3333-3333-333333333333',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'discharge_summary',
     title: 'Hospital Inpatient Discharge Summary',
@@ -559,10 +559,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     source: SEED_SOURCES[2],
   },
   {
-    id: 'r1111111-1111-1111-1111-111111111112',
+    id: 'd1111111-1111-1111-1111-111111111112',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's1111111-1111-1111-1111-111111111111',
+    source_id: 'e1111111-1111-1111-1111-111111111111',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'vaccination',
     title: 'Annual Influenza & COVID-19 Precaution Dose Certificate',
@@ -586,10 +586,10 @@ export const SEED_RECORDS: HealthRecord[] = [
     source: SEED_SOURCES[0],
   },
   {
-    id: 'r1212121-1212-1212-1212-121212121212',
+    id: 'd1212121-1212-1212-1212-121212121212',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's3333333-3333-3333-3333-333333333333',
+    source_id: 'e3333333-3333-3333-3333-333333333333',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'vital_sign',
     title: '24-Hour Ambulatory Blood Pressure Telemetry Log',
@@ -616,7 +616,7 @@ export const SEED_RECORDS: HealthRecord[] = [
     id: 'r1313131-1313-1313-1313-131313131313',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    source_id: 's3333333-3333-3333-3333-333333333333',
+    source_id: 'e3333333-3333-3333-3333-333333333333',
     uploaded_by: '11111111-1111-1111-1111-111111111111',
     category: 'clinical_note',
     title: 'Confidential Mental Health Psychotherapy Encounter Note',
@@ -645,8 +645,8 @@ export const SEED_RECORDS: HealthRecord[] = [
 export const SEED_DUPLICATES: DuplicateRelationship[] = [
   {
     id: 'd1111111-1111-1111-1111-111111111111',
-    primary_record_id: 'r0444444-4444-4444-4444-444444444444',
-    candidate_record_id: 'r0555555-5555-5555-5555-555555555555',
+    primary_record_id: 'd0444444-4444-4444-4444-444444444444',
+    candidate_record_id: 'd0555555-5555-5555-5555-555555555555',
     similarity_score: 100.0,
     match_tier: 'exact_duplicate',
     detection_method: 'hash_match',
@@ -668,8 +668,8 @@ export const SEED_DUPLICATES: DuplicateRelationship[] = [
   },
   {
     id: 'd2222222-2222-2222-2222-222222222222',
-    primary_record_id: 'r0666666-6666-6666-6666-666666666666',
-    candidate_record_id: 'r0777777-7777-7777-7777-777777777777',
+    primary_record_id: 'd0666666-6666-6666-6666-666666666666',
+    candidate_record_id: 'd0777777-7777-7777-7777-777777777777',
     similarity_score: 89.4,
     match_tier: 'near_duplicate',
     detection_method: 'text_similarity',
@@ -692,8 +692,8 @@ export const SEED_DUPLICATES: DuplicateRelationship[] = [
   },
   {
     id: 'd3333333-3333-3333-3333-333333333333',
-    primary_record_id: 'r0111111-1111-1111-1111-111111111111',
-    candidate_record_id: 'r0222222-2222-2222-2222-222222222222',
+    primary_record_id: 'd0111111-1111-1111-1111-111111111111',
+    candidate_record_id: 'd0222222-2222-2222-2222-222222222222',
     similarity_score: 64.2,
     match_tier: 'different_event',
     detection_method: 'metadata_heuristic',
@@ -728,9 +728,9 @@ export const SEED_CONSENTS: ConsentGrant[] = [
     purpose: 'Cardiac consultation & second opinion on hypertension telemetry',
     status: 'active',
     selected_record_ids: [
-      'r0111111-1111-1111-1111-111111111111', // Lipid Profile
-      'r0333333-3333-3333-3333-333333333333', // Cardio Follow-up Note
-      'r0999999-9999-9999-9999-999999999999', // 12-Lead Resting ECG
+      'd0111111-1111-1111-1111-111111111111', // Lipid Profile
+      'd0333333-3333-3333-3333-333333333333', // Cardio Follow-up Note
+      'd0999999-9999-9999-9999-999999999999', // 12-Lead Resting ECG
     ],
     permitted_categories: ['lab_result', 'clinical_note'],
     include_sensitive: false, // Psychotherapy / Sensitive records excluded by default
@@ -750,7 +750,7 @@ export const SEED_CONSENTS: ConsentGrant[] = [
     valid_until: '2026-03-08T00:00:00Z', // Expired 7-day share
     purpose: 'Outpatient pathology verification and radiologist second opinion review',
     status: 'expired',
-    selected_record_ids: ['r0111111-1111-1111-1111-111111111111', 'r0666666-6666-6666-6666-666666666666'],
+    selected_record_ids: ['d0111111-1111-1111-1111-111111111111', 'd0666666-6666-6666-6666-666666666666'],
     permitted_categories: ['lab_result'],
     include_sensitive: false,
     receipt_id: 'REC-ABDM-2026-0301-4412',
@@ -760,7 +760,7 @@ export const SEED_CONSENTS: ConsentGrant[] = [
 ];
 
 export const SEED_CAREGIVER: CaregiverDelegation = {
-  id: 'g1111111-1111-1111-1111-111111111111',
+  id: 'c1111111-1111-1111-1111-111111111111',
   patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
   caregiver_profile_id: '33333333-3333-3333-3333-333333333333',
   caregiver_name: 'Pooja Sharma (Spouse)',
@@ -806,7 +806,7 @@ export const SEED_AUDIT_EVENTS: AuditEvent[] = [
     actor_role: 'specialist',
     action: 'read',
     resource_type: 'health_record',
-    resource_id: 'r0111111-1111-1111-1111-111111111111',
+    resource_id: 'd0111111-1111-1111-1111-111111111111',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     details: { purpose: 'Pre-consultation cardiac risk evaluation', consent_id: 'c1111111-1111-1111-1111-111111111111' },
     ip_address: '14.139.60.2',
@@ -866,7 +866,7 @@ export const SEED_VISIT_SUMMARY: VisitSummary = {
 export const SEED_CORRECTIONS: CorrectionEvent[] = [
   {
     id: 'cor1',
-    record_id: 'r0222222-2222-2222-2222-222222222222',
+    record_id: 'd0222222-2222-2222-2222-222222222222',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     requester_id: '11111111-1111-1111-1111-111111111111',
     proposed_value: 'Clinical Event Date: 2026-02-12',
@@ -883,7 +883,7 @@ export const SEED_CORRECTIONS: CorrectionEvent[] = [
 export const SEED_RECORD_VERSIONS: RecordVersion[] = [
   {
     id: 'rv1',
-    record_id: 'r0222222-2222-2222-2222-222222222222',
+    record_id: 'd0222222-2222-2222-2222-222222222222',
     version_number: 1,
     storage_file_path: 'records/r02-lft-panel-feb2026.pdf',
     change_reason: 'Initial digital ingestion from AIIMS Central Pathology',
@@ -919,7 +919,7 @@ export const SEED_NOTIFICATIONS: NotificationEvent[] = [
     event_type: 'ocr_uncertain',
     title: 'OCR Flag: Handwritten Prescription',
     message: 'A handwritten prescription from Dr. Ananya Iyer requires confirmation for dosage ambiguity.',
-    link_url: '/records/r0888888-8888-8888-8888-888888888888',
+    link_url: '/records/d0888888-8888-8888-8888-888888888888',
     is_read: false,
     created_at: '2026-03-11T12:15:00Z',
   },

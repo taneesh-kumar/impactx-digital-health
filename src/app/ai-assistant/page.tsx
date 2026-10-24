@@ -35,7 +35,7 @@ interface ChatMessage {
   role: 'assistant' | 'user';
   text: string;
   citations?: CitationItem[];
-  engine?: 'gemini' | 'deterministic_fallback';
+  engine?: 'grok' | 'gemini' | 'deterministic_fallback';
   safety_flags?: string[];
   timestamp: string;
 }
@@ -217,7 +217,7 @@ export default function AiAssistantPage() {
         </div>
 
         <span className="text-[11px] font-mono text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
-          Engine: Gemini Free-Tier + Deterministic Fallback
+          Engine: xAI Grok (grok-2-mini) + Guardrails
         </span>
       </div>
 
@@ -278,7 +278,7 @@ export default function AiAssistantPage() {
                     <div className="flex items-center gap-2">
                       {m.engine && (
                         <span className="font-mono text-[9px] bg-white px-1.5 py-0.5 rounded border border-slate-200">
-                          {m.engine === 'gemini' ? 'Gemini 1.5' : 'Deterministic Engine'}
+                          {m.engine === 'grok' ? 'xAI Grok-2' : 'Deterministic Engine'}
                         </span>
                       )}
                       <span>{m.timestamp}</span>

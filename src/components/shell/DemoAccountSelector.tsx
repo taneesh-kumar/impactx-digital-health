@@ -35,16 +35,16 @@ export const DemoAccountSelector: React.FC = () => {
         className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-white text-xs transition-colors"
         aria-label="Switch synthetic demonstration identity"
       >
-        <span className="h-5 w-5 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center text-[10px] font-bold">
+        <span className="h-5 w-5 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ width: '20px', height: '20px' }}>
           {currentProfile.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={currentProfile.avatar_url} alt="" className="h-full w-full object-cover" />
+            <img src={currentProfile.avatar_url} alt="" className="h-full w-full object-cover rounded-full" style={{ width: '20px', height: '20px', objectFit: 'cover' }} />
           ) : (
             <User className="h-3 w-3" />
           )}
         </span>
-        <span className="font-medium">Demo: {getRoleLabel(currentProfile.role).split(' ')[0]}</span>
-        <ChevronDown className="h-3.5 w-3.5 opacity-80" />
+        <span className="font-medium truncate max-w-[120px]">Demo: {getRoleLabel(currentProfile.role).split(' ')[0]}</span>
+        <ChevronDown className="h-3.5 w-3.5 opacity-80 flex-shrink-0" />
       </button>
 
       <Dialog

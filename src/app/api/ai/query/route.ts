@@ -23,8 +23,13 @@ export async function POST(request: Request) {
       emergencySessions || []
     );
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    const result = await executeAiQuery(query, authorizedRecords, actor, apiKey);
+    const grokApiKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
+    const grokModel = process.env.GROK_MODEL || 'grok-2-mini';
+
+    const result = await executeAiQuery(query, authorizedRecords, actor, {
+      grokApiKey,
+      model: grokModel,
+    });
 
     return NextResponse.json(result);
   } catch (error) {

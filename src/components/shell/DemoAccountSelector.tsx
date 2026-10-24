@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 
 export const DemoAccountSelector: React.FC = () => {
-  const { currentProfile, setCurrentProfileId, allProfiles } = useDemoContext();
+  const { currentProfile, setCurrentProfileId, allProfiles, resetAllData } = useDemoContext();
   const [isOpen, setIsOpen] = useState(false);
 
   const getRoleLabel = (role: string) => {
@@ -127,7 +127,19 @@ export const DemoAccountSelector: React.FC = () => {
             })}
           </div>
 
-          <div className="pt-2 flex justify-end">
+          <div className="pt-3 flex items-center justify-between border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Reset all demonstration records, consents, duplicates, and audit logs to factory seed state?')) {
+                  resetAllData();
+                  setIsOpen(false);
+                }
+              }}
+              className="text-xs text-rose-600 hover:text-rose-800 font-medium hover:underline flex items-center gap-1"
+            >
+              Reset Prototype Data to Factory Seed
+            </button>
             <Button variant="secondary" size="sm" onClick={() => setIsOpen(false)}>
               Close
             </Button>

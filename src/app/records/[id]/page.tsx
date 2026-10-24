@@ -34,7 +34,7 @@ export default function RecordDetailPage({ params }: { params: Promise<{ id: str
   const recordId = unwrappedParams.id;
   const router = useRouter();
 
-  const { records, duplicates, consents, updateRecordVerification, logAuditEvent, currentProfile } = useDemoContext();
+  const { records, duplicates, consents, caregiver, emergencySessions, updateRecordVerification, logAuditEvent, currentProfile } = useDemoContext();
   const [activeTab, setActiveTab] = useState<'extracted' | 'preview' | 'provenance' | 'history'>('extracted');
 
   const record = records.find((r) => r.id === recordId);
@@ -52,8 +52,8 @@ export default function RecordDetailPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  // Enforce Granular Consent Guard on Record Detail Page
-  const accessCheck = checkRecordAccess(record, currentProfile, consents);
+  // Enforce Granular Consent, Caregiver & Emergency Guard on Record Detail Page
+  const accessCheck = checkRecordAccess(record, currentProfile, consents, caregiver, emergencySessions);
   if (!accessCheck.allowed) {
     return (
       <div className="max-w-2xl mx-auto my-12 p-8 bg-white border border-rose-200 rounded-xl shadow-sm text-center space-y-4">

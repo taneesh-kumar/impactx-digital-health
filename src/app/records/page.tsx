@@ -22,13 +22,13 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { checkRecordAccess } from '@/lib/security/consent-guard';
 
 export default function RecordsListPage() {
-  const { records, currentProfile, consents } = useDemoContext();
+  const { records, currentProfile, consents, caregiver, emergencySessions } = useDemoContext();
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterQuery, setFilterQuery] = useState('');
 
-  // 1. Enforce RBAC and Granular Consent Guard
+  // 1. Enforce RBAC, Caregiver Delegation & Emergency Access Guard
   const authorizedRecords = records.filter((r) => {
-    const access = checkRecordAccess(r, currentProfile, consents);
+    const access = checkRecordAccess(r, currentProfile, consents, caregiver, emergencySessions);
     return access.allowed;
   });
 
@@ -70,6 +70,36 @@ export default function RecordsListPage() {
           </div>
           <Link href="/share-consent" className="font-bold text-[#244783] hover:underline whitespace-nowrap">
             View Grant & Receipt →
+          </Link>
+        </div>
+      )}
+
+      {currentProfile.role === 'caregiver' && (
+        <div className="rounded-lg bg-purple-50 border border-purple-200 p-3.5 text-xs text-purple-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-purple-900">Caregiver Delegated Scope:</span>
+            <span>
+              Viewing {authorizedRecords.length} of {records.length} records in delegated categories (sensitive categories excluded).
+            </span>
+          </div>
+          <Link href="/caregiver-access" className="font-bold text-purple-900 hover:underline whitespace-nowrap">
+            Caregiver Proxy Details →
+          </Link>
+        </div>
+      )}
+
+      {currentProfile.role === 'emergency_clinician' && (
+        <div className="rounded-lg bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-rose-950">Emergency Break-Glass View:</span>
+            <span>
+              {authorizedRecords.length > 0
+                ? `Emergency session active. Viewing ${authorizedRecords.length} life-safety records.`
+                : 'No active break-glass session. Please invoke emergency session to access trauma records.'}
+            </span>
+          </div>
+          <Link href="/emergency-access" className="font-bold text-rose-900 hover:underline whitespace-nowrap">
+            Emergency Console →
           </Link>
         </div>
       )}

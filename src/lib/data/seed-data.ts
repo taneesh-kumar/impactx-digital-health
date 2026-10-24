@@ -11,6 +11,7 @@ import {
   VisitSummary,
   CorrectionEvent,
   NotificationEvent,
+  EmergencyAccessSession,
 } from '@/lib/supabase/types';
 
 export const SEED_PROFILES: Profile[] = [
@@ -761,14 +762,41 @@ export const SEED_CAREGIVER: CaregiverDelegation = {
   id: 'g1111111-1111-1111-1111-111111111111',
   patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
   caregiver_profile_id: '33333333-3333-3333-3333-333333333333',
+  caregiver_name: 'Pooja Sharma (Spouse)',
   relationship: 'Spouse & Legal Healthcare Proxy',
-  permissions: ['view_records', 'upload_records', 'manage_consents', 'emergency_contact'],
+  permitted_categories: ['lab_result', 'vital_sign', 'prescription'],
+  can_upload: true,
+  can_share_records: false, // Caregiver cannot share records to specialists
+  can_manage_consents: false, // Caregiver cannot revoke patient's grants
+  include_sensitive_categories: false, // Sensitive categories excluded by default
+  start_time: '2026-01-01T00:00:00Z',
+  valid_until: '2027-01-01T00:00:00Z',
   status: 'active',
-  valid_until: '2027-03-20T00:00:00Z',
   approved_at: '2026-01-01T00:00:00Z',
   created_at: '2026-01-01T00:00:00Z',
   caregiver_profile: SEED_PROFILES[2],
 };
+
+export const SEED_EMERGENCY_SESSIONS: EmergencyAccessSession[] = [
+  {
+    id: 'e1111111-1111-1111-1111-111111111111',
+    patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    accessor_provider_id: '44444444-4444-4444-4444-444444444444',
+    clinician_name: 'Dr. Vikram Malhotra, MBBS, DEM',
+    hospital_unit: 'Safdarjung Hospital Emergency Trauma Resuscitation',
+    reason: 'Acute syncope, unarousable patient presenting to emergency resuscitation bay',
+    justification_notes: 'Patient brought in unconscious; proxy unable to unlock device; verified trauma protocol invoked.',
+    duration_minutes: 30, // 30-minute demonstration policy
+    scope_description: 'Critical allergies, blood group, chronic conditions, and recent cardiac summaries',
+    status: 'closed',
+    access_started_at: '2026-03-10T02:18:00Z',
+    access_ended_at: '2026-03-10T02:48:00Z',
+    expires_at: '2026-03-10T02:48:00Z',
+    audit_logged: true,
+    notification_sent: true,
+    created_at: '2026-03-10T02:18:00Z',
+  },
+];
 
 export const SEED_AUDIT_EVENTS: AuditEvent[] = [
   {

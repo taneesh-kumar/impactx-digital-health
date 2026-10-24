@@ -16,6 +16,7 @@
 | **Prompt 3: Duplicate Detection & Conflict Review** | **Complete (100%)** | Deterministic explainable detection engine; SHA-256 hash match vs text similarity vs distinct longitudinal events; side-by-side reconciliation UI; zero silent merges; reproducible benchmark runner (`100% Precision, 100% Recall, 0 False Merges`). |
 | **Prompt 4: Medication Discrepancies & Visit Preparation** | **Complete (100%)** | Explainable medication divergence engine; neutral non-diagnostic phrasing; side-by-side divergent prescription comparisons; customizable visit dossier selector; faithful reproduction of exact lab values/flags; deterministic patient question builder linking questions to source record IDs; print/export layout. |
 | **Prompt 5: Granular Consent, 7-Day Sharing & Revocation** | **Complete (100%)** | Patient-directed consent wizard; granular record-level ID scoping; 7-day specialist sharing scenario; sensitive mental health category exclusion by default; plain-language pre-authorization receipt preview; cryptographic receipt generation; instant revocation with 403 access denial; automated benchmark suite (`7/7 security tests passing`). |
+| **Prompt 6: Caregiver Delegation & Emergency Break-Glass** | **Complete (100%)** | Bounded caregiver proxy permissions (category-level scoping, sensitive category exclusion, cannot share records or revoke patient grants); audited 30-minute emergency break-glass resuscitation protocol restricted to emergency clinicians; life-safety clinical record release with mental health protections; append-only patient-visible audit ledger with zero raw PHI logging; automated benchmark suite (`9/9 security tests passing`). |
 
 ---
 
@@ -59,6 +60,21 @@
 - [x] Review decisions: Keep both, Keep both & link, Mark distinct, Review later
 - [x] Immutable audit trail for all reconciliation decisions
 - [x] Benchmark test runner (`scripts/test-duplicate-engine.mjs`) reporting measured TP, FP, FN, precision, recall
+
+### F. Granular Consent & 7-Day Specialist Sharing (Prompt 5)
+- [x] Patient-directed consent wizard with granular record checklist (`src/app/share-consent/page.tsx`)
+- [x] 7-day default time-bounding and sensitive mental health category exclusion
+- [x] Plain-language pre-authorization receipt and SHA-256 cryptographic receipt verification
+- [x] Instant patient revocation triggering immediate 403 access denial across views and APIs
+- [x] Automated security test suite (`scripts/test-consent-guard.mjs`, 7/7 tests passing)
+
+### G. Caregiver Proxy, Break-Glass & Audit Ledger (Prompt 6)
+- [x] Bounded caregiver proxy management (`src/app/caregiver-access/page.tsx`)
+- [x] Delegated category permissions (lab, vitals, prescriptions); caregiver upload privileges; prohibition against sharing/revoking patient grants
+- [x] 30-minute emergency break-glass resuscitation protocol (`src/app/emergency-access/page.tsx`) restricted to emergency clinicians
+- [x] Automatic exclusion of psychotherapy notes during break-glass resuscitation
+- [x] Append-only audit history ledger (`src/app/access-history/page.tsx`) with zero raw PHI leakage
+- [x] Automated delegated access test suite (`scripts/test-delegated-access.mjs`, 9/9 tests passing)
 
 ---
 

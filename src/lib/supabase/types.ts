@@ -240,10 +240,18 @@ export interface CaregiverDelegation {
   id: string;
   patient_id: string;
   caregiver_profile_id: string;
-  relationship: string;
-  permissions: string[];
-  status: 'pending' | 'active' | 'rejected' | 'terminated';
-  valid_until?: string | null;
+  caregiver_name?: string;
+  relationship: string; // e.g. 'Spouse & Proxy', 'Daughter'
+  permitted_categories: RecordCategory[];
+  can_upload: boolean;
+  can_share_records: boolean; // Caregiver cannot share records with third parties by default
+  can_manage_consents: boolean; // Caregiver cannot revoke patient's grants
+  include_sensitive_categories: boolean; // Excluded by default
+  start_time: string;
+  valid_until: string;
+  status: 'pending' | 'active' | 'rejected' | 'terminated' | 'revoked';
+  revoked_at?: string | null;
+  revocation_reason?: string | null;
   approved_at?: string;
   created_at: string;
   caregiver_profile?: Profile;
@@ -253,12 +261,18 @@ export interface EmergencyAccessSession {
   id: string;
   patient_id: string;
   accessor_provider_id: string;
+  clinician_name: string;
+  hospital_unit: string; // e.g. 'Safdarjung Hospital Emergency Trauma'
   reason: string;
   justification_notes: string;
-  status: 'active' | 'closed' | 'flagged_for_review';
+  duration_minutes: number; // e.g. 30-minute demonstration session
+  scope_description: string; // e.g. 'Critical allergies, blood group, medications, recent diagnostic summaries'
+  status: 'active' | 'closed' | 'expired' | 'flagged_for_review';
   access_started_at: string;
   access_ended_at?: string | null;
+  expires_at: string;
   audit_logged: boolean;
+  notification_sent: boolean;
   created_at: string;
   provider?: Provider;
 }

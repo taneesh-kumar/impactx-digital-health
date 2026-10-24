@@ -1,4 +1,4 @@
-import { HealthRecord, Profile, ConsentGrant } from '@/lib/supabase/types';
+import { HealthRecord, Profile, ConsentGrant, CaregiverDelegation, EmergencyAccessSession } from '@/lib/supabase/types';
 
 export interface AccessCheckResult {
   allowed: boolean;
@@ -9,12 +9,15 @@ export interface AccessCheckResult {
 
 /**
  * Evaluates whether an authenticated actor has access to a specific health record.
- * Enforces ownership, role boundaries, active consent grants, 7-day windows, and sensitive category locks.
+ * Enforces ownership, role boundaries, active consent grants, 7-day windows,
+ * caregiver delegated categories, emergency break-glass sessions, and sensitive category locks.
  */
 export function checkRecordAccess(
   record: HealthRecord,
   actor: Profile,
   consents: ConsentGrant[],
+  caregiver?: CaregiverDelegation | null,
+  emergencySessions: EmergencyAccessSession[] = [],
   currentTime: Date = new Date()
 ): AccessCheckResult {
   // 1. Patient owns all their records
@@ -37,24 +40,17 @@ export function checkRecordAccess(
 
   // 3. Specialist Role Verification
   if (actor.role === 'specialist') {
-    // Check for an active consent grant matching the specialist identity
     const activeGrants = consents.filter((grant) => {
-      // Must match specialist ID or name
       const isRecipient =
         (grant.grantee_id && grant.grantee_id === actor.id) ||
         (grant.grantee_name && grant.grantee_name.toLowerCase().includes(actor.full_name.toLowerCase()));
 
       if (!isRecipient) return false;
-
-      // Status check
       if (grant.status !== 'active') return false;
 
-      // Time validity check (e.g. 7-day sharing window)
       const validFrom = new Date(grant.valid_from);
       const validUntil = new Date(grant.valid_until);
-      const isTimeValid = currentTime >= validFrom && currentTime <= validUntil;
-
-      return isTimeValid;
+      return currentTime >= validFrom && currentTime <= validUntil;
     });
 
     if (activeGrants.length === 0) {
@@ -65,9 +61,7 @@ export function checkRecordAccess(
       };
     }
 
-    // Check record scope within the active grants
     for (const grant of activeGrants) {
-      // Check sensitive category restriction
       if (record.is_sensitive && !grant.include_sensitive) {
         return {
           allowed: false,
@@ -77,7 +71,6 @@ export function checkRecordAccess(
         };
       }
 
-      // Check granular record ID selection
       if (grant.selected_record_ids && grant.selected_record_ids.length > 0) {
         if (grant.selected_record_ids.includes(record.id)) {
           return {
@@ -111,21 +104,73 @@ export function checkRecordAccess(
     };
   }
 
-  // 4. Caregiver (Delegation handled in Prompt 6, default denied for specialist endpoints)
+  // 4. Caregiver Delegation Authorization
   if (actor.role === 'caregiver') {
+    if (!caregiver || caregiver.status !== 'active') {
+      return {
+        allowed: false,
+        reason: 'Access Denied: Caregiver proxy delegation is not active or has been revoked.',
+        statusCode: 403,
+      };
+    }
+
+    // Caregivers cannot access sensitive categories unless explicitly granted
+    if (record.is_sensitive && !caregiver.include_sensitive_categories) {
+      return {
+        allowed: false,
+        reason: 'Access Denied: Sensitive mental health records are excluded from caregiver delegation.',
+        statusCode: 403,
+      };
+    }
+
+    // Check delegated permitted categories
+    if (caregiver.permitted_categories && caregiver.permitted_categories.includes(record.category)) {
+      return {
+        allowed: true,
+        reason: `Access Granted: Category (${record.category}) permitted under Active Caregiver Proxy Delegation.`,
+        statusCode: 200,
+      };
+    }
+
     return {
       allowed: false,
-      reason: 'Caregiver delegation policy applies. Restricted from specialist consent grants.',
+      reason: `Access Denied: Category (${record.category}) is outside the scope delegated by the patient.`,
       statusCode: 403,
     };
   }
 
-  // 5. Emergency Clinician (Break-glass handled in Prompt 6)
+  // 5. Emergency Clinician (Break-Glass Protocol)
   if (actor.role === 'emergency_clinician') {
+    // Must have an active, non-expired Break-Glass session
+    const activeSession = emergencySessions.find((s) => {
+      if (s.status !== 'active') return false;
+      const started = new Date(s.access_started_at);
+      const expires = new Date(s.expires_at);
+      return currentTime >= started && currentTime <= expires;
+    });
+
+    if (!activeSession) {
+      return {
+        allowed: false,
+        reason: 'Access Denied: Emergency Break-Glass session is not active or has expired (30-min duration limit).',
+        statusCode: 403,
+      };
+    }
+
+    // Break-glass grants life-safety records (vital signs, lab results, prescriptions, allergies, discharge summaries)
+    // Sensitive mental health records remain protected unless trauma team explicitly overrides
+    if (record.is_sensitive) {
+      return {
+        allowed: false,
+        reason: 'Access Denied: Mental health psychotherapy records excluded from emergency resuscitation protocol.',
+        statusCode: 403,
+      };
+    }
+
     return {
-      allowed: false,
-      reason: 'Emergency Break-Glass session required for unconsented trauma access.',
-      statusCode: 403,
+      allowed: true,
+      reason: `Access Granted: Emergency Break-Glass Session Active (${activeSession.reason}). Session expires at ${new Date(activeSession.expires_at).toLocaleTimeString()}.`,
+      statusCode: 200,
     };
   }
 
@@ -143,7 +188,9 @@ export function getAuthorizedRecords(
   records: HealthRecord[],
   actor: Profile,
   consents: ConsentGrant[],
+  caregiver?: CaregiverDelegation | null,
+  emergencySessions: EmergencyAccessSession[] = [],
   currentTime: Date = new Date()
 ): HealthRecord[] {
-  return records.filter((r) => checkRecordAccess(r, actor, consents, currentTime).allowed);
+  return records.filter((r) => checkRecordAccess(r, actor, consents, caregiver, emergencySessions, currentTime).allowed);
 }

@@ -7,6 +7,7 @@ import {
   DuplicateRelationship,
   ConsentGrant,
   CaregiverDelegation,
+  EmergencyAccessSession,
   AuditEvent,
   Role,
   DuplicateReviewStatus,
@@ -18,6 +19,7 @@ import {
   SEED_DUPLICATES,
   SEED_CONSENTS,
   SEED_CAREGIVER,
+  SEED_EMERGENCY_SESSIONS,
   SEED_AUDIT_EVENTS,
 } from '@/lib/data/seed-data';
 
@@ -29,6 +31,7 @@ interface DemoContextType {
   duplicates: DuplicateRelationship[];
   consents: ConsentGrant[];
   caregiver: CaregiverDelegation;
+  emergencySessions: EmergencyAccessSession[];
   auditEvents: AuditEvent[];
   searchQuery: string;
   setSearchQuery: (q: string) => void;
@@ -38,6 +41,10 @@ interface DemoContextType {
   updateRecordVerification: (recordId: string, status: HealthRecord['verification_status']) => void;
   createConsentGrant: (grantData: Partial<ConsentGrant>) => ConsentGrant;
   revokeConsentGrant: (grantId: string, reason?: string) => void;
+  updateCaregiverDelegation: (delegation: Partial<CaregiverDelegation>) => void;
+  revokeCaregiverDelegation: (reason?: string) => void;
+  startEmergencySession: (reason: string, justification: string, hospitalUnit?: string) => EmergencyAccessSession;
+  closeEmergencySession: (sessionId: string) => void;
   logAuditEvent: (event: Omit<AuditEvent, 'id' | 'created_at'>) => void;
   // Computed Counts (Strictly Data-Driven)
   counts: {
@@ -59,6 +66,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [duplicates, setDuplicates] = useState<DuplicateRelationship[]>(SEED_DUPLICATES);
   const [consents, setConsents] = useState<ConsentGrant[]>(SEED_CONSENTS);
   const [caregiver, setCaregiver] = useState<CaregiverDelegation>(SEED_CAREGIVER);
+  const [emergencySessions, setEmergencySessions] = useState<EmergencyAccessSession[]>(SEED_EMERGENCY_SESSIONS);
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>(SEED_AUDIT_EVENTS);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -80,6 +88,14 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       const savedConsents = localStorage.getItem('swasthya_consents');
       if (savedConsents) {
         setConsents(JSON.parse(savedConsents));
+      }
+      const savedCaregiver = localStorage.getItem('swasthya_caregiver');
+      if (savedCaregiver) {
+        setCaregiver(JSON.parse(savedCaregiver));
+      }
+      const savedEmergency = localStorage.getItem('swasthya_emergency_sessions');
+      if (savedEmergency) {
+        setEmergencySessions(JSON.parse(savedEmergency));
       }
       const savedAudit = localStorage.getItem('swasthya_audit');
       if (savedAudit) {
@@ -298,16 +314,155 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const updateCaregiverDelegation = (delegationData: Partial<CaregiverDelegation>) => {
+    setCaregiver((prev) => {
+      const updated: CaregiverDelegation = {
+        ...prev,
+        ...delegationData,
+        status: 'active',
+      };
+      try {
+        localStorage.setItem('swasthya_caregiver', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    logAuditEvent({
+      user_id: currentProfile.id,
+      actor_role: currentProfile.role,
+      action: 'caregiver_delegation_update',
+      resource_type: 'caregiver_delegation',
+      resource_id: caregiver.id,
+      patient_id: SEED_PATIENT.id,
+      details: {
+        permitted_categories: delegationData.permitted_categories || caregiver.permitted_categories,
+        can_upload: delegationData.can_upload ?? caregiver.can_upload,
+        include_sensitive: delegationData.include_sensitive_categories ?? caregiver.include_sensitive_categories,
+      },
+      severity: 'info',
+    });
+  };
+
+  const revokeCaregiverDelegation = (reason = 'Patient revoked caregiver proxy access') => {
+    setCaregiver((prev) => {
+      const updated: CaregiverDelegation = {
+        ...prev,
+        status: 'revoked',
+        revoked_at: new Date().toISOString(),
+        revocation_reason: reason,
+      };
+      try {
+        localStorage.setItem('swasthya_caregiver', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    logAuditEvent({
+      user_id: currentProfile.id,
+      actor_role: currentProfile.role,
+      action: 'caregiver_delegation_revoke',
+      resource_type: 'caregiver_delegation',
+      resource_id: caregiver.id,
+      patient_id: SEED_PATIENT.id,
+      details: { revocation_reason: reason },
+      severity: 'warning',
+    });
+  };
+
+  const startEmergencySession = (
+    reason: string,
+    justification: string,
+    hospitalUnit = 'Safdarjung Hospital Emergency Trauma Resuscitation'
+  ): EmergencyAccessSession => {
+    const startedAt = new Date();
+    const expiresAt = new Date(startedAt.getTime() + 30 * 60 * 1000); // 30-minute demonstration window
+    const newSession: EmergencyAccessSession = {
+      id: `es-${Date.now()}`,
+      patient_id: SEED_PATIENT.id,
+      accessor_provider_id: currentProfile.id,
+      clinician_name: currentProfile.full_name,
+      hospital_unit: hospitalUnit,
+      reason: reason || 'Acute Medical Emergency / Unresponsive Patient Protocol',
+      justification_notes: justification || 'Patient presents in critical status; surrogate consent unavailable.',
+      duration_minutes: 30,
+      scope_description: 'Life-safety records: allergies, blood group, chronic conditions, and recent summaries',
+      status: 'active',
+      access_started_at: startedAt.toISOString(),
+      expires_at: expiresAt.toISOString(),
+      audit_logged: true,
+      notification_sent: true,
+      created_at: startedAt.toISOString(),
+    };
+
+    setEmergencySessions((prev) => {
+      const updated = [newSession, ...prev];
+      try {
+        localStorage.setItem('swasthya_emergency_sessions', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    logAuditEvent({
+      user_id: currentProfile.id,
+      actor_role: currentProfile.role,
+      action: 'emergency_break_glass_invoke',
+      resource_type: 'emergency_access_session',
+      resource_id: newSession.id,
+      patient_id: SEED_PATIENT.id,
+      details: {
+        reason: newSession.reason,
+        clinician: currentProfile.full_name,
+        expires_at: newSession.expires_at,
+        unit: hospitalUnit,
+      },
+      severity: 'critical',
+    });
+
+    return newSession;
+  };
+
+  const closeEmergencySession = (sessionId: string) => {
+    setEmergencySessions((prev) => {
+      const updated = prev.map((s) =>
+        s.id === sessionId
+          ? {
+              ...s,
+              status: 'closed' as const,
+              access_ended_at: new Date().toISOString(),
+            }
+          : s
+      );
+      try {
+        localStorage.setItem('swasthya_emergency_sessions', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    logAuditEvent({
+      user_id: currentProfile.id,
+      actor_role: currentProfile.role,
+      action: 'emergency_break_glass_close',
+      resource_type: 'emergency_access_session',
+      resource_id: sessionId,
+      patient_id: SEED_PATIENT.id,
+      details: { session_id: sessionId },
+      severity: 'info',
+    });
+  };
+
   const resetAllData = () => {
     localStorage.removeItem('swasthya_records');
     localStorage.removeItem('swasthya_duplicates');
     localStorage.removeItem('swasthya_consents');
+    localStorage.removeItem('swasthya_caregiver');
+    localStorage.removeItem('swasthya_emergency_sessions');
     localStorage.removeItem('swasthya_audit');
     localStorage.removeItem('swasthya_profile_id');
     setRecords(SEED_RECORDS);
     setDuplicates(SEED_DUPLICATES);
     setConsents(SEED_CONSENTS);
     setCaregiver(SEED_CAREGIVER);
+    setEmergencySessions(SEED_EMERGENCY_SESSIONS);
     setAuditEvents(SEED_AUDIT_EVENTS);
     setCurrentProfileId('11111111-1111-1111-1111-111111111111');
   };
@@ -332,6 +487,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         duplicates,
         consents,
         caregiver,
+        emergencySessions,
         auditEvents,
         searchQuery,
         setSearchQuery,
@@ -340,6 +496,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         updateRecordVerification,
         createConsentGrant,
         revokeConsentGrant,
+        updateCaregiverDelegation,
+        revokeCaregiverDelegation,
+        startEmergencySession,
+        closeEmergencySession,
         logAuditEvent,
         counts,
         resetAllData,

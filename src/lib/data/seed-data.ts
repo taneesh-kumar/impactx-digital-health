@@ -610,6 +610,34 @@ export const SEED_RECORDS: HealthRecord[] = [
     provider: SEED_PROVIDERS[0],
     source: SEED_SOURCES[2],
   },
+  {
+    id: 'r1313131-1313-1313-1313-131313131313',
+    patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    provider_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    source_id: 's3333333-3333-3333-3333-333333333333',
+    uploaded_by: '11111111-1111-1111-1111-111111111111',
+    category: 'clinical_note',
+    title: 'Confidential Mental Health Psychotherapy Encounter Note',
+    description: 'Psychological counseling session addressing chronic health stress. Marked as highly sensitive under ABDM data privacy rules.',
+    clinical_event_date: '2026-02-24',
+    report_date: '2026-02-24',
+    upload_timestamp: '2026-02-25T11:00:00Z',
+    storage_file_path: 'records/r13-psychotherapy-confidential.pdf',
+    file_type: 'application/pdf',
+    file_size: 215000,
+    sha256_hash: 'd8c7b8a9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7',
+    verification_status: 'verified',
+    extraction_method: 'native_digital',
+    ocr_confidence: 100,
+    has_date_conflict: false,
+    date_conflict_details: null,
+    is_superseded: false,
+    is_sensitive: true, // Sensitive category: excluded from default selections
+    created_at: '2026-02-25T11:00:00Z',
+    updated_at: '2026-02-25T11:00:00Z',
+    provider: SEED_PROVIDERS[0],
+    source: SEED_SOURCES[2],
+  },
 ];
 
 export const SEED_DUPLICATES: DuplicateRelationship[] = [
@@ -689,15 +717,24 @@ export const SEED_CONSENTS: ConsentGrant[] = [
     id: 'c1111111-1111-1111-1111-111111111111',
     patient_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     grantee_type: 'provider',
-    grantee_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    grantee_id: '22222222-2222-2222-2222-222222222222',
     grantee_name: 'Dr. Ananya Iyer, MD (AIIMS Cardiology)',
-    scope: 'all_records',
-    permissions: ['read', 'delegate'],
-    valid_from: '2026-02-20T00:00:00Z',
-    valid_until: '2026-08-20T00:00:00Z',
-    purpose: 'Comprehensive cardiac risk assessment, chronic hypertension management and medication monitoring',
+    scope: 'time_bounded',
+    permissions: ['read'],
+    valid_from: '2026-03-20T00:00:00Z',
+    valid_until: '2026-03-27T00:00:00Z', // Exactly 7-day sharing window
+    purpose: 'Cardiac consultation & second opinion on hypertension telemetry',
     status: 'active',
-    created_at: '2026-02-20T00:00:00Z',
+    selected_record_ids: [
+      'r0111111-1111-1111-1111-111111111111', // Lipid Profile
+      'r0333333-3333-3333-3333-333333333333', // Cardio Follow-up Note
+      'r0999999-9999-9999-9999-999999999999', // 12-Lead Resting ECG
+    ],
+    permitted_categories: ['lab_result', 'clinical_note'],
+    include_sensitive: false, // Psychotherapy / Sensitive records excluded by default
+    receipt_id: 'REC-ABDM-2026-0320-9041',
+    receipt_hash: '7e2b19f864e2920fbbad9e0344d67e5a1b38f8cf622c1b489a691456bc384df9',
+    created_at: '2026-03-20T09:30:00Z',
   },
   {
     id: 'c2222222-2222-2222-2222-222222222222',
@@ -707,11 +744,16 @@ export const SEED_CONSENTS: ConsentGrant[] = [
     grantee_name: 'Apollo Specialty Hospital Network',
     scope: 'lab_results_only',
     permissions: ['read'],
-    valid_from: '2026-03-14T00:00:00Z',
-    valid_until: '2026-04-03T00:00:00Z',
+    valid_from: '2026-03-01T00:00:00Z',
+    valid_until: '2026-03-08T00:00:00Z', // Expired 7-day share
     purpose: 'Outpatient pathology verification and radiologist second opinion review',
-    status: 'active',
-    created_at: '2026-03-14T00:00:00Z',
+    status: 'expired',
+    selected_record_ids: ['r0111111-1111-1111-1111-111111111111', 'r0666666-6666-6666-6666-666666666666'],
+    permitted_categories: ['lab_result'],
+    include_sensitive: false,
+    receipt_id: 'REC-ABDM-2026-0301-4412',
+    receipt_hash: '2c5a78d067b8a8b0d4e92900f91bc86f0c4391e4b31644e999c0daefc2980811',
+    created_at: '2026-03-01T10:00:00Z',
   },
 ];
 

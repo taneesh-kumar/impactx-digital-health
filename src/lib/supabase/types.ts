@@ -128,6 +128,7 @@ export interface HealthRecord {
   date_conflict_details?: string | null;
   is_superseded: boolean;
   superseded_by?: string | null;
+  is_sensitive?: boolean; // Mental health, psychotherapy, HIV, reproductive health
   metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -204,6 +205,12 @@ export interface ConsentGrant {
   status: ConsentStatus;
   revoked_at?: string | null;
   revoke_reason?: string | null;
+  // Granular Prompt 5 Fields
+  selected_record_ids?: string[];
+  permitted_categories?: RecordCategory[];
+  include_sensitive?: boolean;
+  receipt_id?: string;
+  receipt_hash?: string;
   created_at: string;
 }
 
@@ -211,6 +218,16 @@ export interface ConsentReceipt {
   id: string;
   consent_grant_id: string;
   patient_id: string;
+  receipt_number: string;
+  grantee_name: string;
+  purpose: string;
+  valid_from: string;
+  valid_until: string;
+  shared_items_count: number;
+  shared_record_titles: string[];
+  include_sensitive: boolean;
+  revocation_policy: string;
+  external_copies_notice: string;
   hash_signature: string;
   receipt_token: string;
   policy_version: string;

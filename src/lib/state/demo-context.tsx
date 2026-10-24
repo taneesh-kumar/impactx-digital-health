@@ -36,6 +36,8 @@ interface DemoContextType {
   resolveDuplicate: (duplicateId: string, decision: DuplicateReviewStatus, notes?: string) => void;
   addRecord: (newRecord: Partial<HealthRecord>) => HealthRecord;
   updateRecordVerification: (recordId: string, status: HealthRecord['verification_status']) => void;
+  createConsentGrant: (grantData: Partial<ConsentGrant>) => ConsentGrant;
+  revokeConsentGrant: (grantId: string, reason?: string) => void;
   logAuditEvent: (event: Omit<AuditEvent, 'id' | 'created_at'>) => void;
   // Computed Counts (Strictly Data-Driven)
   counts: {
@@ -74,6 +76,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       const savedDuplicates = localStorage.getItem('swasthya_duplicates');
       if (savedDuplicates) {
         setDuplicates(JSON.parse(savedDuplicates));
+      }
+      const savedConsents = localStorage.getItem('swasthya_consents');
+      if (savedConsents) {
+        setConsents(JSON.parse(savedConsents));
       }
       const savedAudit = localStorage.getItem('swasthya_audit');
       if (savedAudit) {
@@ -211,9 +217,91 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const createConsentGrant = (grantData: Partial<ConsentGrant>): ConsentGrant => {
+    const grantId = `cg-${Date.now()}`;
+    const receiptNum = `REC-ABDM-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newGrant: ConsentGrant = {
+      id: grantId,
+      patient_id: SEED_PATIENT.id,
+      grantee_type: grantData.grantee_type || 'provider',
+      grantee_id: grantData.grantee_id || null,
+      grantee_name: grantData.grantee_name || 'Authorized Healthcare Specialist',
+      scope: grantData.scope || 'time_bounded',
+      permissions: grantData.permissions || ['read'],
+      valid_from: grantData.valid_from || new Date().toISOString(),
+      valid_until: grantData.valid_until || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      purpose: grantData.purpose || 'Clinical consultation & diagnostic second opinion',
+      status: 'active',
+      selected_record_ids: grantData.selected_record_ids || [],
+      permitted_categories: grantData.permitted_categories || [],
+      include_sensitive: Boolean(grantData.include_sensitive),
+      receipt_id: receiptNum,
+      receipt_hash: `hash-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      created_at: new Date().toISOString(),
+    };
+
+    setConsents((prev) => {
+      const updated = [newGrant, ...prev];
+      try {
+        localStorage.setItem('swasthya_consents', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    logAuditEvent({
+      user_id: currentProfile.id,
+      actor_role: currentProfile.role,
+      action: 'consent_grant_create',
+      resource_type: 'consent_grant',
+      resource_id: newGrant.id,
+      patient_id: SEED_PATIENT.id,
+      details: {
+        grantee_name: newGrant.grantee_name,
+        records_count: newGrant.selected_record_ids?.length || 0,
+        valid_until: newGrant.valid_until,
+        receipt_id: newGrant.receipt_id,
+        include_sensitive: newGrant.include_sensitive,
+      },
+      severity: 'info',
+    });
+
+    return newGrant;
+  };
+
+  const revokeConsentGrant = (grantId: string, reason = 'Patient initiated revocation') => {
+    setConsents((prev) => {
+      const updated = prev.map((c) =>
+        c.id === grantId
+          ? {
+              ...c,
+              status: 'revoked' as const,
+              revoked_at: new Date().toISOString(),
+              revoke_reason: reason,
+            }
+          : c
+      );
+      try {
+        localStorage.setItem('swasthya_consents', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    logAuditEvent({
+      user_id: currentProfile.id,
+      actor_role: currentProfile.role,
+      action: 'consent_grant_revoke',
+      resource_type: 'consent_grant',
+      resource_id: grantId,
+      patient_id: SEED_PATIENT.id,
+      details: { grant_id: grantId, revocation_reason: reason },
+      severity: 'warning',
+    });
+  };
+
   const resetAllData = () => {
     localStorage.removeItem('swasthya_records');
     localStorage.removeItem('swasthya_duplicates');
+    localStorage.removeItem('swasthya_consents');
     localStorage.removeItem('swasthya_audit');
     localStorage.removeItem('swasthya_profile_id');
     setRecords(SEED_RECORDS);
@@ -250,6 +338,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         resolveDuplicate,
         addRecord,
         updateRecordVerification,
+        createConsentGrant,
+        revokeConsentGrant,
         logAuditEvent,
         counts,
         resetAllData,

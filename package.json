@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node scripts/test-duplicate-engine.mjs"
+    "test": "node scripts/test-duplicate-engine.mjs && node scripts/test-consent-guard.mjs",
+    "test:duplicates": "node scripts/test-duplicate-engine.mjs",
+    "test:consent": "node scripts/test-consent-guard.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

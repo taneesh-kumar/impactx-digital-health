@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { checkRecordAccess } from '@/lib/security/consent-guard';
 
 export default function RecordDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -48,6 +49,37 @@ export default function RecordDetailPage({ params }: { params: Promise<{ id: str
         actionLabel="Return to Timeline"
         onAction={() => router.push('/timeline')}
       />
+    );
+  }
+
+  // Enforce Granular Consent Guard on Record Detail Page
+  const accessCheck = checkRecordAccess(record, currentProfile, consents);
+  if (!accessCheck.allowed) {
+    return (
+      <div className="max-w-2xl mx-auto my-12 p-8 bg-white border border-rose-200 rounded-xl shadow-sm text-center space-y-4">
+        <div className="h-14 w-14 rounded-full bg-rose-50 text-rose-700 mx-auto flex items-center justify-center">
+          <Lock className="h-7 w-7" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">403 Access Denied: Protected Clinical Record</h2>
+          <p className="text-xs text-rose-800 mt-2 font-medium bg-rose-50 p-3 rounded-lg border border-rose-200">
+            {accessCheck.reason}
+          </p>
+        </div>
+        <p className="text-xs text-slate-500 leading-relaxed max-w-md mx-auto">
+          Under SwasthyaSetu patient-controlled access policies, healthcare specialists can only view records explicitly included in an active, non-expired consent grant.
+        </p>
+        <div className="pt-3 flex justify-center gap-3">
+          <Button variant="outline" size="sm" onClick={() => router.push('/records')}>
+            Return to Authorized Records
+          </Button>
+          <Link href="/share-consent">
+            <Button variant="primary" size="sm">
+              Inspect Active Consents
+            </Button>
+          </Link>
+        </div>
+      </div>
     );
   }
 

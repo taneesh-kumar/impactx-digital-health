@@ -19,13 +19,20 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
+import { checkRecordAccess } from '@/lib/security/consent-guard';
 
 export default function RecordsListPage() {
-  const { records } = useDemoContext();
+  const { records, currentProfile, consents } = useDemoContext();
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterQuery, setFilterQuery] = useState('');
 
-  const filtered = records.filter((r) => {
+  // 1. Enforce RBAC and Granular Consent Guard
+  const authorizedRecords = records.filter((r) => {
+    const access = checkRecordAccess(r, currentProfile, consents);
+    return access.allowed;
+  });
+
+  const filtered = authorizedRecords.filter((r) => {
     if (filterCategory !== 'all' && r.category !== filterCategory) return false;
     if (filterQuery) {
       const q = filterQuery.toLowerCase();
@@ -52,6 +59,20 @@ export default function RecordsListPage() {
           </Link>
         </div>
       </div>
+
+      {currentProfile.role === 'specialist' && (
+        <div className="rounded-lg bg-blue-50 border border-blue-200 p-3.5 text-xs text-blue-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[#244783]">Specialist Consultation Scope:</span>
+            <span>
+              Viewing {authorizedRecords.length} of {records.length} records explicitly authorized by Rajesh Sharma under active consent grant.
+            </span>
+          </div>
+          <Link href="/share-consent" className="font-bold text-[#244783] hover:underline whitespace-nowrap">
+            View Grant & Receipt →
+          </Link>
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3">

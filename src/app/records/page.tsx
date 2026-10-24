@@ -169,24 +169,34 @@ export default function RecordsListPage() {
               </TableCell>
 
               <TableCell>
-                <Badge
-                  size="sm"
-                  variant={
-                    record.verification_status === 'verified'
-                      ? 'success'
-                      : record.verification_status === 'date_conflict'
-                      ? 'warning'
+                {record.is_superseded ? (
+                  <Badge size="sm" variant="warning">
+                    Superseded (v1)
+                  </Badge>
+                ) : record.title.includes('(Amended v2)') ? (
+                  <Badge size="sm" variant="success">
+                    Amended (v2)
+                  </Badge>
+                ) : (
+                  <Badge
+                    size="sm"
+                    variant={
+                      record.verification_status === 'verified'
+                        ? 'success'
+                        : record.verification_status === 'date_conflict'
+                        ? 'warning'
+                        : record.verification_status === 'ocr_uncertain'
+                        ? 'orange'
+                        : 'neutral'
+                    }
+                  >
+                    {record.verification_status === 'date_conflict'
+                      ? 'Date Conflict'
                       : record.verification_status === 'ocr_uncertain'
-                      ? 'orange'
-                      : 'neutral'
-                  }
-                >
-                  {record.verification_status === 'date_conflict'
-                    ? 'Date Conflict'
-                    : record.verification_status === 'ocr_uncertain'
-                    ? 'OCR Ambiguity'
-                    : record.verification_status}
-                </Badge>
+                      ? 'OCR Ambiguity'
+                      : record.verification_status}
+                  </Badge>
+                )}
               </TableCell>
 
               <TableCell className="font-mono text-xs text-slate-600">

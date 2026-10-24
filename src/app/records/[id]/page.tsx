@@ -22,6 +22,7 @@ import {
   Eye,
   History,
   Lock,
+  ArrowRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -182,6 +183,66 @@ export default function RecordDetailPage({ params }: { params: Promise<{ id: str
             </div>
           </div>
         </div>
+
+        {/* SUPERSEDED RECORD BANNER (Prompt 7) */}
+        {record.is_superseded && (
+          <div className="rounded-lg border border-amber-400 bg-amber-50 p-4 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-700 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm text-amber-900">Superseded Clinical Record (v1)</span>
+                  <Badge variant="warning" size="sm">Superseded / Inactive</Badge>
+                </div>
+                <p className="text-amber-800 leading-relaxed">
+                  This record has been superseded by an amended clinical version {record.superseded_by ? `(${record.superseded_by})` : ''}.
+                  Under healthcare compliance rules, original documents are preserved indefinitely for legal audit integrity.
+                  Do <strong>NOT</strong> use this superseded record for active clinical decision-making.
+                </p>
+              </div>
+            </div>
+            {record.superseded_by && (
+              <Link href={`/records/${record.superseded_by}`}>
+                <Button variant="gov-orange" size="sm" className="whitespace-nowrap">
+                  View Latest Corrected Record
+                  <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                </Button>
+              </Link>
+            )}
+          </div>
+        )}
+
+        {/* AMENDED / CORRECTED RECORD BANNER (Prompt 7) */}
+        {(record.title.includes('(Amended v2)') || Boolean(record.metadata && (record.metadata as Record<string, unknown>).previous_record_id)) && (
+          <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-4 text-xs text-emerald-950 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-700 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm text-emerald-900">Clinically Corrected & Verified Record (Version 2)</span>
+                  <Badge variant="success" size="sm">Active Clinical Version</Badge>
+                </div>
+                <p className="text-emerald-800 leading-relaxed">
+                  {(record.metadata && ((record.metadata as Record<string, unknown>).amendment_rationale as string)) ||
+                    'This record contains verified provider amendments. The earlier version has been archived with a superseded status.'}
+                </p>
+                {Boolean(record.metadata && (record.metadata as Record<string, unknown>).amended_by) && (
+                  <p className="text-[11px] text-emerald-700 font-mono">
+                    Verified Amendment by: {String((record.metadata as Record<string, unknown>).amended_by)}
+                  </p>
+                )}
+              </div>
+            </div>
+            {Boolean(record.metadata && (record.metadata as Record<string, unknown>).previous_record_id) && (
+              <Link href={`/records/${String((record.metadata as Record<string, unknown>).previous_record_id)}`}>
+                <Button variant="outline" size="sm" className="whitespace-nowrap text-xs">
+                  <History className="h-3.5 w-3.5 mr-1.5" />
+                  Inspect Superseded v1 Record
+                </Button>
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* DATE CONFLICT WARNING BANNER (When present) */}
         {record.has_date_conflict && (

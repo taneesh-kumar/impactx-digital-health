@@ -11,6 +11,9 @@ import {
   AuditEvent,
   Role,
   DuplicateReviewStatus,
+  CorrectionEvent,
+  NotificationEvent,
+  RecordVersion,
 } from '@/lib/supabase/types';
 import {
   SEED_PROFILES,
@@ -21,6 +24,9 @@ import {
   SEED_CAREGIVER,
   SEED_EMERGENCY_SESSIONS,
   SEED_AUDIT_EVENTS,
+  SEED_CORRECTIONS,
+  SEED_NOTIFICATIONS,
+  SEED_RECORD_VERSIONS,
 } from '@/lib/data/seed-data';
 
 interface DemoContextType {
@@ -33,6 +39,9 @@ interface DemoContextType {
   caregiver: CaregiverDelegation;
   emergencySessions: EmergencyAccessSession[];
   auditEvents: AuditEvent[];
+  corrections: CorrectionEvent[];
+  notifications: NotificationEvent[];
+  recordVersions: RecordVersion[];
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   // Actions
@@ -45,6 +54,28 @@ interface DemoContextType {
   revokeCaregiverDelegation: (reason?: string) => void;
   startEmergencySession: (reason: string, justification: string, hospitalUnit?: string) => EmergencyAccessSession;
   closeEmergencySession: (sessionId: string) => void;
+  proposeCorrection: (data: {
+    recordId: string;
+    proposedValue: string;
+    previousValue: string;
+    reason: string;
+  }) => CorrectionEvent;
+  publishProviderCorrection: (params: {
+    recordId: string;
+    fieldName: string;
+    correctedValue: string;
+    previousValue: string;
+    clinicalRationale: string;
+  }) => {
+    success: boolean;
+    newRecord?: HealthRecord;
+    previousRecord?: HealthRecord;
+    notifiedGrants: ConsentGrant[];
+    blockedGrants: ConsentGrant[];
+    error?: string;
+  };
+  reviewCorrection: (correctionId: string, status: 'approved' | 'rejected', notes?: string) => void;
+  markNotificationRead: (notificationId: string) => void;
   logAuditEvent: (event: Omit<AuditEvent, 'id' | 'created_at'>) => void;
   // Computed Counts (Strictly Data-Driven)
   counts: {
@@ -54,6 +85,8 @@ interface DemoContextType {
     ocrUncertainCount: number;
     activeSharesCount: number;
     caregiverCount: number;
+    unreadNotificationsCount: number;
+    pendingCorrectionsCount: number;
   };
   resetAllData: () => void;
 }
@@ -68,6 +101,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [caregiver, setCaregiver] = useState<CaregiverDelegation>(SEED_CAREGIVER);
   const [emergencySessions, setEmergencySessions] = useState<EmergencyAccessSession[]>(SEED_EMERGENCY_SESSIONS);
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>(SEED_AUDIT_EVENTS);
+  const [corrections, setCorrections] = useState<CorrectionEvent[]>(SEED_CORRECTIONS);
+  const [notifications, setNotifications] = useState<NotificationEvent[]>(SEED_NOTIFICATIONS);
+  const [recordVersions, setRecordVersions] = useState<RecordVersion[]>(SEED_RECORD_VERSIONS);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Synchronize from localStorage if previously stored
@@ -100,6 +136,18 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       const savedAudit = localStorage.getItem('swasthya_audit');
       if (savedAudit) {
         setAuditEvents(JSON.parse(savedAudit));
+      }
+      const savedCorrections = localStorage.getItem('swasthya_corrections');
+      if (savedCorrections) {
+        setCorrections(JSON.parse(savedCorrections));
+      }
+      const savedNotifications = localStorage.getItem('swasthya_notifications');
+      if (savedNotifications) {
+        setNotifications(JSON.parse(savedNotifications));
+      }
+      const savedVersions = localStorage.getItem('swasthya_record_versions');
+      if (savedVersions) {
+        setRecordVersions(JSON.parse(savedVersions));
       }
     } catch {
       // Local storage fallback
@@ -450,6 +498,309 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const proposeCorrection = (data: {
+    recordId: string;
+    proposedValue: string;
+    previousValue: string;
+    reason: string;
+  }): CorrectionEvent => {
+    const target = records.find((r) => r.id === data.recordId);
+    const newCorrection: CorrectionEvent = {
+      id: `cor-${Date.now()}`,
+      record_id: data.recordId,
+      patient_id: SEED_PATIENT.id,
+      requester_id: currentProfile.id,
+      proposed_value: data.proposedValue,
+      previous_value: data.previousValue,
+      reason: data.reason,
+      status: 'in_review',
+      reviewer_id: null,
+      reviewer_notes: 'Pending provider clinical review and signoff',
+      created_at: new Date().toISOString(),
+      record_title: target?.title || 'Clinical Health Record',
+    };
+
+    setCorrections((prev) => {
+      const updated = [newCorrection, ...prev];
+      try {
+        localStorage.setItem('swasthya_corrections', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    logAuditEvent({
+      user_id: currentProfile.id,
+      actor_role: currentProfile.role,
+      action: 'correction_inquiry_submitted',
+      resource_type: 'correction_request',
+      resource_id: newCorrection.id,
+      patient_id: SEED_PATIENT.id,
+      details: {
+        record_id: data.recordId,
+        proposed_value: data.proposedValue,
+        reason: data.reason,
+      },
+      severity: 'info',
+    });
+
+    return newCorrection;
+  };
+
+  const publishProviderCorrection = (params: {
+    recordId: string;
+    fieldName: string;
+    correctedValue: string;
+    previousValue: string;
+    clinicalRationale: string;
+  }): {
+    success: boolean;
+    newRecord?: HealthRecord;
+    previousRecord?: HealthRecord;
+    notifiedGrants: ConsentGrant[];
+    blockedGrants: ConsentGrant[];
+    error?: string;
+  } => {
+    // 1. Role Authorization Check: Only licensed medical providers can amend clinical records
+    if (currentProfile.role !== 'specialist' && currentProfile.role !== 'emergency_clinician') {
+      return {
+        success: false,
+        notifiedGrants: [],
+        blockedGrants: [],
+        error: 'Security Policy: Only licensed healthcare providers can publish clinical corrections. Patients and caregivers may submit correction requests for review.',
+      };
+    }
+
+    const target = records.find((r) => r.id === params.recordId);
+    if (!target) {
+      return {
+        success: false,
+        notifiedGrants: [],
+        blockedGrants: [],
+        error: `Target clinical record (${params.recordId}) not found.`,
+      };
+    }
+
+    const timestamp = new Date().toISOString();
+    const newRecordId = `r-corr-${Date.now().toString().slice(-8)}`;
+
+    // 2. Clone and update target record to create amended version
+    const updatedFields = (target.extracted_fields || []).map((f) => {
+      if (f.field_name.toLowerCase().includes(params.fieldName.toLowerCase()) || f.field_name === params.fieldName) {
+        return {
+          ...f,
+          field_value: params.correctedValue,
+          provenance_note: `Amended by ${currentProfile.full_name} (${currentProfile.role}) on ${new Date().toLocaleDateString()}: ${params.clinicalRationale}`,
+          status: 'verified' as const,
+        };
+      }
+      return f;
+    });
+
+    const newRecord: HealthRecord = {
+      ...target,
+      id: newRecordId,
+      title: `${target.title.replace(' (Amended v2)', '')} (Amended v2)`,
+      description: `${target.description || ''} [Clinically amended by ${currentProfile.full_name}: ${params.clinicalRationale}]`.trim(),
+      is_superseded: false,
+      superseded_by: null,
+      verification_status: 'verified',
+      upload_timestamp: timestamp,
+      created_at: timestamp,
+      updated_at: timestamp,
+      extracted_fields: updatedFields,
+      metadata: {
+        ...(target.metadata || {}),
+        amended_by: currentProfile.full_name,
+        previous_record_id: target.id,
+        amendment_rationale: params.clinicalRationale,
+        version: 2,
+      },
+    };
+
+    // 3. Mark original target record as superseded (Zero silent deletion - immutable audit preservation)
+    const supersededTarget: HealthRecord = {
+      ...target,
+      is_superseded: true,
+      superseded_by: newRecordId,
+      updated_at: timestamp,
+    };
+
+    // Update records state
+    const nextRecords = records.map((r) => (r.id === target.id ? supersededTarget : r)).concat(newRecord);
+    setRecords(nextRecords);
+    try {
+      localStorage.setItem('swasthya_records', JSON.stringify(nextRecords));
+    } catch {}
+
+    // 4. Create RecordVersion entry
+    const newVersion: RecordVersion = {
+      id: `rv-${Date.now()}`,
+      record_id: newRecordId,
+      version_number: 2,
+      change_reason: params.clinicalRationale,
+      changed_by: currentProfile.full_name,
+      created_at: timestamp,
+    };
+    setRecordVersions((prev) => {
+      const updated = [newVersion, ...prev];
+      try {
+        localStorage.setItem('swasthya_record_versions', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    // 5. Consent-Bound Propagation Engine: Notify ACTIVE shares ONLY; Block EXPIRED/REVOKED
+    const nowTime = new Date();
+    const notifiedGrants: ConsentGrant[] = [];
+    const blockedGrants: ConsentGrant[] = [];
+
+    const updatedConsents = consents.map((grant) => {
+      const isTimeValid = new Date(grant.valid_from) <= nowTime && nowTime <= new Date(grant.valid_until);
+      const isActive = grant.status === 'active' && isTimeValid;
+
+      const coversRecord =
+        grant.scope === 'all_records' ||
+        (grant.selected_record_ids && grant.selected_record_ids.includes(target.id)) ||
+        (grant.permitted_categories && grant.permitted_categories.includes(target.category));
+
+      if (coversRecord) {
+        if (isActive) {
+          notifiedGrants.push(grant);
+          // If granularly scoped, propagate access to the corrected record
+          if (grant.selected_record_ids && !grant.selected_record_ids.includes(newRecordId)) {
+            return {
+              ...grant,
+              selected_record_ids: [...grant.selected_record_ids, newRecordId],
+            };
+          }
+        } else {
+          blockedGrants.push(grant);
+        }
+      }
+      return grant;
+    });
+
+    setConsents(updatedConsents);
+    try {
+      localStorage.setItem('swasthya_consents', JSON.stringify(updatedConsents));
+    } catch {}
+
+    // 6. Generate Notification Events for active grantees and the patient
+    const newNotifications: NotificationEvent[] = [];
+
+    notifiedGrants.forEach((grant) => {
+      newNotifications.push({
+        id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        recipient_user_id: grant.grantee_id || currentProfile.id,
+        event_type: 'record_corrected',
+        title: `Clinical Correction: ${target.title}`,
+        message: `${currentProfile.full_name} published an amended version for ${target.title} (${params.fieldName} updated to ${params.correctedValue}). The previous version is now superseded.`,
+        link_url: `/records/${newRecordId}`,
+        is_read: false,
+        created_at: timestamp,
+      });
+    });
+
+    // Also notify patient
+    newNotifications.push({
+      id: `notif-pat-${Date.now()}`,
+      recipient_user_id: target.patient_id,
+      event_type: 'record_corrected',
+      title: `Lab Report Amended: ${target.title}`,
+      message: `${currentProfile.full_name} issued a verified amendment for ${params.fieldName} (${params.previousValue} -> ${params.correctedValue}). Rationale: ${params.clinicalRationale}`,
+      link_url: `/records/${newRecordId}`,
+      is_read: false,
+      created_at: timestamp,
+    });
+
+    setNotifications((prev) => {
+      const updated = [...newNotifications, ...prev];
+      try {
+        localStorage.setItem('swasthya_notifications', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    // 7. Auto-approve any pending correction request for this record
+    setCorrections((prev) => {
+      const updated = prev.map((c) =>
+        c.record_id === target.id && c.status === 'in_review'
+          ? {
+              ...c,
+              status: 'approved' as const,
+              reviewer_id: currentProfile.id,
+              reviewer_notes: `Approved and published by ${currentProfile.full_name}: ${params.clinicalRationale}`,
+              resolved_at: timestamp,
+            }
+          : c
+      );
+      try {
+        localStorage.setItem('swasthya_corrections', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    // 8. Immutable Audit Trail
+    logAuditEvent({
+      user_id: currentProfile.id,
+      actor_role: currentProfile.role,
+      action: 'provider_correction_published',
+      resource_type: 'health_record',
+      resource_id: newRecordId,
+      patient_id: target.patient_id,
+      details: {
+        previous_record_id: target.id,
+        field_amended: params.fieldName,
+        previous_val: params.previousValue,
+        corrected_val: params.correctedValue,
+        clinical_rationale: params.clinicalRationale,
+        notified_active_shares: notifiedGrants.map((g) => ({ id: g.id, grantee: g.grantee_name })),
+        blocked_expired_shares: blockedGrants.map((g) => ({ id: g.id, grantee: g.grantee_name, status: g.status })),
+      },
+      severity: 'info',
+    });
+
+    return {
+      success: true,
+      newRecord,
+      previousRecord: supersededTarget,
+      notifiedGrants,
+      blockedGrants,
+    };
+  };
+
+  const reviewCorrection = (correctionId: string, status: 'approved' | 'rejected', notes?: string) => {
+    setCorrections((prev) => {
+      const updated = prev.map((c) =>
+        c.id === correctionId
+          ? {
+              ...c,
+              status,
+              reviewer_id: currentProfile.id,
+              reviewer_notes: notes || `Reviewed by ${currentProfile.full_name}`,
+              resolved_at: new Date().toISOString(),
+            }
+          : c
+      );
+      try {
+        localStorage.setItem('swasthya_corrections', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const markNotificationRead = (notificationId: string) => {
+    setNotifications((prev) => {
+      const updated = prev.map((n) =>
+        n.id === notificationId ? { ...n, is_read: true, read_at: new Date().toISOString() } : n
+      );
+      try {
+        localStorage.setItem('swasthya_notifications', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
   const resetAllData = () => {
     localStorage.removeItem('swasthya_records');
     localStorage.removeItem('swasthya_duplicates');
@@ -457,6 +808,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('swasthya_caregiver');
     localStorage.removeItem('swasthya_emergency_sessions');
     localStorage.removeItem('swasthya_audit');
+    localStorage.removeItem('swasthya_corrections');
+    localStorage.removeItem('swasthya_notifications');
+    localStorage.removeItem('swasthya_record_versions');
     localStorage.removeItem('swasthya_profile_id');
     setRecords(SEED_RECORDS);
     setDuplicates(SEED_DUPLICATES);
@@ -464,6 +818,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     setCaregiver(SEED_CAREGIVER);
     setEmergencySessions(SEED_EMERGENCY_SESSIONS);
     setAuditEvents(SEED_AUDIT_EVENTS);
+    setCorrections(SEED_CORRECTIONS);
+    setNotifications(SEED_NOTIFICATIONS);
+    setRecordVersions(SEED_RECORD_VERSIONS);
     setCurrentProfileId('11111111-1111-1111-1111-111111111111');
   };
 
@@ -475,6 +832,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     ocrUncertainCount: records.filter((r) => r.verification_status === 'ocr_uncertain').length,
     activeSharesCount: consents.filter((c) => c.status === 'active').length,
     caregiverCount: caregiver.status === 'active' ? 1 : 0,
+    unreadNotificationsCount: notifications.filter((n) => !n.is_read).length,
+    pendingCorrectionsCount: corrections.filter((c) => c.status === 'in_review').length,
   };
 
   return (
@@ -489,6 +848,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         caregiver,
         emergencySessions,
         auditEvents,
+        corrections,
+        notifications,
+        recordVersions,
         searchQuery,
         setSearchQuery,
         resolveDuplicate,
@@ -500,6 +862,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         revokeCaregiverDelegation,
         startEmergencySession,
         closeEmergencySession,
+        proposeCorrection,
+        publishProviderCorrection,
+        reviewCorrection,
+        markNotificationRead,
         logAuditEvent,
         counts,
         resetAllData,

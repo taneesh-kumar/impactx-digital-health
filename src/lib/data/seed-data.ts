@@ -12,6 +12,7 @@ import {
   CorrectionEvent,
   NotificationEvent,
   EmergencyAccessSession,
+  RecordVersion,
 } from '@/lib/supabase/types';
 
 export const SEED_PROFILES: Profile[] = [
@@ -876,6 +877,18 @@ export const SEED_CORRECTIONS: CorrectionEvent[] = [
     reviewer_notes: 'Reviewing phlebotomy laboratory barcode logs to re-align clinical chronology.',
     created_at: '2026-03-02T10:00:00Z',
     record_title: 'Hepatic Function & Bilirubin Panel (Date Discrepancy)',
+  },
+];
+
+export const SEED_RECORD_VERSIONS: RecordVersion[] = [
+  {
+    id: 'rv1',
+    record_id: 'r0222222-2222-2222-2222-222222222222',
+    version_number: 1,
+    storage_file_path: 'records/r02-lft-panel-feb2026.pdf',
+    change_reason: 'Initial digital ingestion from AIIMS Central Pathology',
+    changed_by: 'Pathology Ingestion Bridge',
+    created_at: '2026-03-01T14:15:00Z',
   },
 ];
 

@@ -17,6 +17,7 @@
 | **Prompt 4: Medication Discrepancies & Visit Preparation** | **Complete (100%)** | Explainable medication divergence engine; neutral non-diagnostic phrasing; side-by-side divergent prescription comparisons; customizable visit dossier selector; faithful reproduction of exact lab values/flags; deterministic patient question builder linking questions to source record IDs; print/export layout. |
 | **Prompt 5: Granular Consent, 7-Day Sharing & Revocation** | **Complete (100%)** | Patient-directed consent wizard; granular record-level ID scoping; 7-day specialist sharing scenario; sensitive mental health category exclusion by default; plain-language pre-authorization receipt preview; cryptographic receipt generation; instant revocation with 403 access denial; automated benchmark suite (`7/7 security tests passing`). |
 | **Prompt 6: Caregiver Delegation & Emergency Break-Glass** | **Complete (100%)** | Bounded caregiver proxy permissions (category-level scoping, sensitive category exclusion, cannot share records or revoke patient grants); audited 30-minute emergency break-glass resuscitation protocol restricted to emergency clinicians; life-safety clinical record release with mental health protections; append-only patient-visible audit ledger with zero raw PHI logging; automated benchmark suite (`9/9 security tests passing`). |
+| **Prompt 7: Provider Corrections & Share Propagation** | **Complete (100%)** | Provider-originated correction workflow (patients/caregivers restricted to inquiries); immutable versioning (preceding version preserved with `is_superseded: true`, pointer to v2, zero silent deletes); ABDM consent-bound propagation engine notifying active shares while strictly blocking expired/revoked shares; recipient and record detail views with superseded warning banners and provenance badges; automated benchmark suite (`9/9 tests passing`). |
 
 ---
 
@@ -75,6 +76,14 @@
 - [x] Automatic exclusion of psychotherapy notes during break-glass resuscitation
 - [x] Append-only audit history ledger (`src/app/access-history/page.tsx`) with zero raw PHI leakage
 - [x] Automated delegated access test suite (`scripts/test-delegated-access.mjs`, 9/9 tests passing)
+
+### H. Provider Corrections & Active Share Propagation (Prompt 7)
+- [x] Provider-originated correction workflow and patient inquiry forms (`src/app/corrections/page.tsx`)
+- [x] Immutable versioning preserving prior records with `is_superseded: true`, pointer to new v2 record, and zero silent deletions
+- [x] ABDM consent-bound propagation engine notifying active shares while strictly blocking expired or revoked shares
+- [x] Recipient & record detail views displaying superseded warning banners and amended v2 provenance badges (`src/app/records/[id]/page.tsx`)
+- [x] Records list reflecting superseded/amended status badges (`src/app/records/page.tsx`)
+- [x] Automated clinical corrections & propagation test suite (`scripts/test-provider-corrections.mjs`, 9/9 tests passing)
 
 ---
 

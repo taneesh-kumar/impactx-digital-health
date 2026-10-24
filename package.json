@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node scripts/test-duplicate-engine.mjs && node scripts/test-consent-guard.mjs && node scripts/test-delegated-access.mjs",
+    "test": "node scripts/test-duplicate-engine.mjs && node scripts/test-consent-guard.mjs && node scripts/test-delegated-access.mjs && node scripts/test-provider-corrections.mjs",
     "test:duplicates": "node scripts/test-duplicate-engine.mjs",
     "test:consent": "node scripts/test-consent-guard.mjs",
-    "test:delegated": "node scripts/test-delegated-access.mjs"
+    "test:delegated": "node scripts/test-delegated-access.mjs",
+    "test:corrections": "node scripts/test-provider-corrections.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

@@ -131,14 +131,14 @@ export const DemoAccountSelector: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                if (window.confirm('Reset all demonstration records, consents, duplicates, and audit logs to factory seed state?')) {
+                if (window.confirm('Reset all records, consents, duplicates, and activity logs to default state?')) {
                   resetAllData();
                   setIsOpen(false);
                 }
               }}
               className="text-xs text-rose-600 hover:text-rose-800 font-medium hover:underline flex items-center gap-1"
             >
-              Reset Prototype Data to Factory Seed
+              Reset Data to Default State
             </button>
             <Button variant="secondary" size="sm" onClick={() => setIsOpen(false)}>
               Close

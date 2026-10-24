@@ -139,13 +139,13 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
               </div>
             </Link>
 
-            {/* Challenge Prototype Notice Badge */}
+            {/* Digital Health Mission Subtitle */}
             <div className="hidden lg:block border-l border-slate-200 pl-4 ml-2">
               <div className="text-xs font-semibold text-slate-800">
-                IMPACTX 2026 Challenge Prototype <span className="text-slate-400 font-normal">|</span> <span className="text-[#0d5ca8]">Synthetic Data</span>
+                National Digital Health Portal <span className="text-slate-400 font-normal">|</span> <span className="text-[#0d5ca8]">ABDM Compliant</span>
               </div>
               <div className="text-[11px] text-slate-500">
-                Building a Safer, More Informed Digital Health Journey
+                Unified Health Interface & Longitudinal Records
               </div>
             </div>
           </div>
@@ -259,25 +259,25 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
                 <Shield className="h-4 w-4" />
               </div>
               <div>
-                <p className="font-semibold text-white">SwasthyaSetu — Digital Health Architecture</p>
+                <p className="font-semibold text-white">SwasthyaSetu — Digital Health Services</p>
                 <p className="text-[11px] text-slate-400">
-                  Patient-Controlled Health Records | Built for IMPACTX 2026 Challenge | ABDM Ready
+                  Patient-Controlled Health Records | Ministry of Health & Family Welfare Guidelines
                 </p>
               </div>
             </div>
 
             <div className="flex items-center space-x-6 text-[11px] text-slate-400">
               <Link href="/access-history" className="hover:text-white transition-colors">
-                Audit Trail
+                Activity History
               </Link>
               <Link href="/share-consent" className="hover:text-white transition-colors">
-                Consent Policies
+                Privacy & Consent
               </Link>
               <Link href="/duplicate-review" className="hover:text-white transition-colors">
-                Explainable Reconciliation
+                Record Reconciliation
               </Link>
               <span className="text-emerald-400 flex items-center gap-1 font-medium">
-                ● RLS Enforced
+                ● 256-Bit Encrypted
               </span>
             </div>
           </div>

@@ -104,22 +104,17 @@ export default function ShareConsentPage() {
       {/* Header Bar */}
       <div className="rounded-xl bg-white p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="bg-[#244783] text-white text-[11px] font-bold px-2 py-0.5 rounded">
-              PROMPT 5
-            </span>
-            <h1 className="text-xl font-bold text-[#173567]">
-              Granular Consent, 7-Day Specialist Sharing & Immediate Revocation
-            </h1>
-          </div>
+          <h1 className="text-xl font-bold text-[#173567]">
+            Share Records & Consent Management
+          </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Patient-controlled authorization: specify recipient, individual record scope, and strict time limits backed by plain-language receipts.
+            Patient-controlled authorization: specify recipient, individual record scope, and time limits backed by verified receipts.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="gov-orange" size="sm" onClick={handleOpenGrantModal}>
             <Plus className="h-4 w-4 mr-1.5" />
-            Create 7-Day Specialist Share
+            Create Specialist Share
           </Button>
         </div>
       </div>
@@ -129,10 +124,10 @@ export default function ShareConsentPage() {
         <Shield className="h-5 w-5 text-[#244783] flex-shrink-0 mt-0.5" />
         <div className="space-y-1">
           <p className="font-bold text-blue-950">
-            Cryptographic Consent Policy & Revocation Boundaries:
+            Consent Policy & Revocation Boundaries
           </p>
           <p className="text-blue-900/90 leading-relaxed">
-            Grants enforce record-level scopes and automatic expiration. When access is revoked, subsequent protected API requests are instantly denied and logged to the immutable audit trail. Notice: External physical or local PDF files previously downloaded by the recipient cannot be deleted remotely.
+            Grants enforce record-level scopes and automatic expiration. When access is revoked, subsequent requests are immediately blocked. Notice: External physical or local PDF files previously downloaded by the recipient cannot be deleted remotely.
           </p>
         </div>
       </div>
@@ -264,20 +259,20 @@ export default function ShareConsentPage() {
         </Table>
       </div>
 
-      {/* Specialist View Link Simulation */}
+      {/* Recipient View Link */}
       <div className="rounded-xl bg-slate-50 p-5 border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <KeyRound className="h-4 w-4 text-[#244783]" />
-            Specialist Access Simulation & Verification
+            Specialist Access & Verification
           </h3>
           <p className="text-xs text-slate-600 mt-0.5">
-            Switch demonstration role to <strong>Dr. Ananya Iyer (Specialist)</strong> to verify that only granted records are visible and revoked shares deny access.
+            Recipients can only view health records that have been explicitly granted in an active consent grant.
           </p>
         </div>
         <Link href="/records">
           <Button variant="primary" size="sm" className="whitespace-nowrap">
-            View Records as Active Identity <ArrowRight className="h-3.5 w-3.5 ml-1" />
+            View Records <ArrowRight className="h-3.5 w-3.5 ml-1" />
           </Button>
         </Link>
       </div>
@@ -332,7 +327,7 @@ export default function ShareConsentPage() {
             {/* Duration (7-Day default) */}
             <div>
               <label className="font-bold text-slate-800 block mb-1">
-                Access Duration (Demonstration Configuration)
+                Access Duration
               </label>
               <div className="grid grid-cols-3 gap-2">
                 <button
@@ -370,7 +365,7 @@ export default function ShareConsentPage() {
                 </button>
               </div>
               <p className="text-[10px] text-slate-500 mt-1">
-                *The 7-day duration is a demonstration setting, not an official statutory ABDM policy.
+                Grants will automatically expire after the selected duration unless renewed.
               </p>
             </div>
 

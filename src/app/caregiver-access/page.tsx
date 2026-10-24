@@ -73,14 +73,9 @@ export default function CaregiverAccessPage() {
       {/* Header Bar */}
       <div className="rounded-xl bg-white p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="bg-[#244783] text-white text-[11px] font-bold px-2 py-0.5 rounded">
-              PROMPT 6
-            </span>
-            <h1 className="text-xl font-bold text-[#173567]">
-              Caregiver Access & Healthcare Proxy Delegation
-            </h1>
-          </div>
+          <h1 className="text-xl font-bold text-[#173567]">
+            Caregiver Access & Healthcare Proxy Delegation
+          </h1>
           <p className="text-xs text-slate-500 mt-1">
             Authorize trusted family members or proxies with bounded record-viewing rights. Caregivers cannot share records or revoke patient grants.
           </p>

@@ -250,17 +250,17 @@ export default function OverviewPage() {
         </div>
       </section>
 
-      {/* 4. CONTINUE DEMONSTRATION JOURNEY & RECENT HIGHLIGHTS */}
+      {/* 4. ACTION ITEMS & RECENT HIGHLIGHTS */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Demonstration Milestones */}
+        {/* Action Items */}
         <div className="lg:col-span-7 rounded-xl bg-white p-5 border border-slate-200 shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Continue Demonstration Journey</h3>
-              <p className="text-xs text-slate-500">Key inspection points across Prompt 0, 1, 2, and 3</p>
+              <h3 className="text-sm font-bold text-slate-900">Records Requiring Attention</h3>
+              <p className="text-xs text-slate-500">Unresolved duplicate candidates and clinical date anomalies</p>
             </div>
             <Badge variant="orange" size="sm">
-              3 Tasks Ready
+              3 Items Pending
             </Badge>
           </div>
 

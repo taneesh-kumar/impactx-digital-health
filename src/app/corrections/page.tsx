@@ -159,16 +159,11 @@ export default function CorrectionsPage() {
       {/* Header Bar */}
       <div className="rounded-xl bg-white p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="bg-[#244783] text-white text-[11px] font-bold px-2 py-0.5 rounded">
-              PROMPT 7
-            </span>
-            <h1 className="text-xl font-bold text-[#173567]">
-              Clinical Corrections & Active Share Propagation
-            </h1>
-          </div>
+          <h1 className="text-xl font-bold text-[#173567]">
+            Clinical Corrections & Record Amendments
+          </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Provider-originated clinical corrections, version history with superseded preservation, and ABDM consent-bound propagation to active specialist shares.
+            Provider-originated clinical corrections, version history with preserved audit provenance, and propagation to active specialist shares.
           </p>
         </div>
 
@@ -215,12 +210,12 @@ export default function CorrectionsPage() {
       <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-sm text-[#173567]">Prompt 7 Live Demonstration:</span>
-            <Badge variant="info" size="sm">1-Click Simulation</Badge>
+            <span className="font-bold text-sm text-[#173567]">Automated Amendment Workflow:</span>
+            <Badge variant="info" size="sm">Test Run</Badge>
           </div>
           <p className="text-xs text-slate-700">
-            Simulate <strong>Dr. Ananya Iyer</strong> publishing an amended Fasting Lipid Profile (Total Cholesterol: 194 -&gt; 168 mg/dL).
-            Watch the system supersede v1, notify active specialist shares, and strictly block expired shares.
+            Publish an amended Fasting Lipid Profile (Total Cholesterol: 194 -&gt; 168 mg/dL) from <strong>Dr. Ananya Iyer</strong>.
+            The system will supersede Version 1, preserve audit provenance, and notify active specialist shares.
           </p>
         </div>
 

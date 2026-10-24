@@ -41,21 +41,16 @@ export default function AccessHistoryPage() {
       {/* Header Bar */}
       <div className="rounded-xl bg-white p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="bg-[#244783] text-white text-[11px] font-bold px-2 py-0.5 rounded">
-              PROMPT 6
-            </span>
-            <h1 className="text-xl font-bold text-[#173567]">
-              Patient-Visible Access History & Append-Only Audit Trail
-            </h1>
-          </div>
+          <h1 className="text-xl font-bold text-[#173567]">
+            Account Activity & Access History
+          </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Complete, transparent ledger of every access attempt, consent grant, caregiver action, and emergency break-glass event.
+            Complete, transparent ledger of every access event, consent grant, caregiver action, and emergency access session.
           </p>
         </div>
         <span className="font-mono text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded font-semibold flex items-center gap-1.5 self-start sm:self-auto">
           <Shield className="h-3.5 w-3.5 text-emerald-600" />
-          Append-Only (Zero Deletes Permitted)
+          Encrypted & Tamper-Evident
         </span>
       </div>
 

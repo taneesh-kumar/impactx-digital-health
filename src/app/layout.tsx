@@ -13,7 +13,7 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: 'SwasthyaSetu — Patient-Controlled Health Records',
-  description: 'A secure, explainable digital health record journey built for IMPACTX 2026. ABDM ready.',
+  description: 'A secure, patient-controlled digital health platform for longitudinal record management. ABDM compliant.',
 };
 
 export default function RootLayout({

@@ -93,14 +93,9 @@ export default function VisitPrepPage() {
       {/* Header Bar */}
       <div className="rounded-xl bg-white p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="bg-[#244783] text-white text-[11px] font-bold px-2 py-0.5 rounded">
-              PROMPT 4
-            </span>
-            <h1 className="text-xl font-bold text-[#173567]">
-              Visit Preparation & Medication Discrepancy Review
-            </h1>
-          </div>
+          <h1 className="text-xl font-bold text-[#173567]">
+            Visit Preparation & Medication Discrepancy Review
+          </h1>
           <p className="text-xs text-slate-500 mt-1">
             Empower patients to prepare for clinical appointments with source-cited facts, medication divergence flags, and doctor clarification questions.
           </p>
@@ -488,7 +483,7 @@ export default function VisitPrepPage() {
 
             {/* Footer Sign-off */}
             <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400">
-              <span>SwasthyaSetu Patient Dossier Export • Prototype Demo Data Only</span>
+              <span>SwasthyaSetu Patient Dossier Export • Generated for Clinical Consultation</span>
               <span>All facts verifiable to Record IDs</span>
             </div>
           </div>

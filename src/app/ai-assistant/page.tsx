@@ -173,16 +173,11 @@ export default function AiAssistantPage() {
       {/* Header Bar */}
       <div className="rounded-xl bg-white p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="bg-[#244783] text-white text-[11px] font-bold px-2 py-0.5 rounded">
-              PROMPT 8
-            </span>
-            <h1 className="text-xl font-bold text-[#173567]">
-              Restricted Clinical AI Assistant (Gemini & Fallback)
-            </h1>
-          </div>
+          <h1 className="text-xl font-bold text-[#173567]">
+            Health Records Assistant
+          </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Privacy-preserving, non-diagnostic assistant strictly bounded by ABDM consent scope and citing verified record IDs.
+            Privacy-preserving health record assistant strictly bounded by your consent permissions with citations to source documents.
           </p>
         </div>
 

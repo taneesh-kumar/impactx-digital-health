@@ -18,6 +18,7 @@
 | **Prompt 5: Granular Consent, 7-Day Sharing & Revocation** | **Complete (100%)** | Patient-directed consent wizard; granular record-level ID scoping; 7-day specialist sharing scenario; sensitive mental health category exclusion by default; plain-language pre-authorization receipt preview; cryptographic receipt generation; instant revocation with 403 access denial; automated benchmark suite (`7/7 security tests passing`). |
 | **Prompt 6: Caregiver Delegation & Emergency Break-Glass** | **Complete (100%)** | Bounded caregiver proxy permissions (category-level scoping, sensitive category exclusion, cannot share records or revoke patient grants); audited 30-minute emergency break-glass resuscitation protocol restricted to emergency clinicians; life-safety clinical record release with mental health protections; append-only patient-visible audit ledger with zero raw PHI logging; automated benchmark suite (`9/9 security tests passing`). |
 | **Prompt 7: Provider Corrections & Share Propagation** | **Complete (100%)** | Provider-originated correction workflow (patients/caregivers restricted to inquiries); immutable versioning (preceding version preserved with `is_superseded: true`, pointer to v2, zero silent deletes); ABDM consent-bound propagation engine notifying active shares while strictly blocking expired/revoked shares; recipient and record detail views with superseded warning banners and provenance badges; automated benchmark suite (`9/9 tests passing`). |
+| **Prompt 8: Restricted Gemini AI Assistant** | **Complete (100%)** | Privacy-preserving clinical reasoning assistant bounded strictly by actor authorization and ABDM consent scope; Gemini free-tier cloud model integration with robust local deterministic fallback engine; strict non-diagnostic and medication-alteration safety guardrails; exact factual citations with clickable record links (`/records/[id]`); automated benchmark suite (`8/8 tests passing`). |
 
 ---
 
@@ -84,6 +85,14 @@
 - [x] Recipient & record detail views displaying superseded warning banners and amended v2 provenance badges (`src/app/records/[id]/page.tsx`)
 - [x] Records list reflecting superseded/amended status badges (`src/app/records/page.tsx`)
 - [x] Automated clinical corrections & propagation test suite (`scripts/test-provider-corrections.mjs`, 9/9 tests passing)
+
+### I. Restricted Gemini Clinical AI Assistant (Prompt 8)
+- [x] Server-side AI evaluation route with role-scoped authorization filtering (`src/app/api/ai/query/route.ts`)
+- [x] Hybrid reasoning engine: Gemini free-tier cloud model binding with comprehensive local deterministic fallback (`src/lib/ai/assistant-engine.ts`)
+- [x] Strict clinical safety guardrails: diagnostic inquiries and medication alteration requests declined with physician referral notices
+- [x] Factual precision and clickable markdown citations referencing authorized record IDs (`/records/[id]`)
+- [x] Interactive government portal chat interface with prompt chips and safety warnings (`src/app/ai-assistant/page.tsx`)
+- [x] Automated clinical AI benchmark test suite (`scripts/test-ai-assistant.mjs`, 8/8 tests passing)
 
 ---
 
